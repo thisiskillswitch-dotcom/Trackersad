@@ -99,6 +99,10 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
 .quick button b{display:block;font-weight:600;font-size:15px}
 .quick button span{font-size:13px;color:var(--muted)}
 .quick button:active{background:var(--grass)}
+.quick button{position:relative}
+.quick button i{position:absolute;top:6px;right:8px;font-style:normal;background:var(--pitch);color:var(--kit);font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:14px;border-radius:10px;min-width:22px;height:22px;line-height:22px;text-align:center;padding:0 6px}
+.quick button .del{position:absolute;bottom:4px;right:6px;background:none;border:0;color:var(--muted);font-size:16px;width:auto;padding:4px}
+.foodgroup{margin:14px 0 6px;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;color:var(--muted)}
 .log{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-top:8px}
 .log .ent{display:flex;align-items:center;padding:10px 14px;border-top:1px solid var(--line);gap:8px}
 .log .ent:first-child{border-top:0}
@@ -175,8 +179,8 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
       <div class="row"><span>Protein</span><span><b id="proNow">0</b> g / 150 g</span></div>
       <div class="bar"><i id="proBar" style="width:0"></i></div>
     </div>
-    <h2>Tap to add</h2>
-    <div class="quick" id="quick"></div>
+    <p class="muted" style="margin:10px 2px 0">Tap once per serving. 3 eggs = tap Egg 3 times.</p>
+    <div id="quick"></div>
     <h3>Something else</h3>
     <div class="custom">
       <input id="cName" placeholder="Food" aria-label="Food name">
@@ -184,6 +188,7 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
       <input id="cPro" inputmode="numeric" placeholder="Prot" aria-label="Protein grams">
       <button class="btn" id="cAdd">Add</button>
     </div>
+    <label class="muted" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="cSave"> Save as a button for next time</label>
     <h3>Logged</h3>
     <div class="log" id="log"></div>
   </section>
@@ -284,19 +289,33 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
 
 <script>
 (function(){
-const WORKOUTS = {1:"Upper A",2:"Lower A",3:"Conditioning",4:"Upper B",5:"Lower B + sprints",6:"Rest or soccer",0:"Rest + Sunday prep"};
-const MEALS = [
-  {n:"Flavoured yogurt (20 g)",c:140,p:20},
-  {n:"Rice + chicken + veg",c:415,p:37},
-  {n:"Rice + 3 eggs + spinach",c:425,p:23},
-  {n:"Oats + Greek yogurt + berries",c:270,p:17},
-  {n:"Protein bagel",c:250,p:20},
-  {n:"Vega shake",c:160,p:30},
-  {n:"Chicken wrap",c:600,p:60},
-  {n:"Beef wrap",c:700,p:65},
-  {n:"Eggs + spinach + sweet potato",c:335,p:21},
-  {n:"Extra chicken (150 g)",c:250,p:45},
-  {n:"Fruit",c:90,p:1}
+const WORKOUTS = {1:"Upper A",2:"Lower A",3:"Conditioning",4:"Upper B",5:"Lower B",6:"Rest or soccer",0:"Rest + Sunday prep"};
+const FOODS = [
+  {g:"Protein", n:"Egg (1 medium)", c:65, p:5.5},
+  {g:"Protein", n:"Costco chicken breast (130 g)", c:155, p:28.5},
+  {g:"Protein", n:"Chicken breast, cooked (120 g)", c:200, p:37},
+  {g:"Protein", n:"Lean ground beef, cooked (100 g)", c:215, p:26},
+  {g:"Protein", n:"Greek yogurt 0% (3/4 cup)", c:100, p:18},
+  {g:"Protein", n:"Flavoured yogurt cup (20 g)", c:140, p:20},
+  {g:"Protein", n:"Cottage cheese (1/2 cup)", c:90, p:12},
+  {g:"Protein", n:"Vega shake (1 scoop)", c:160, p:30},
+  {g:"Protein", n:"Milk 1% (1 cup)", c:110, p:9},
+  {g:"Carbs", n:"Rice, uncooked (1/2 cup)", c:340, p:6},
+  {g:"Carbs", n:"Microwave rice (1 cup)", c:210, p:4},
+  {g:"Carbs", n:"Oats, dry (1/2 cup)", c:150, p:5},
+  {g:"Carbs", n:"Protein bagel (1)", c:250, p:20},
+  {g:"Carbs", n:"Protein tortilla (1)", c:120, p:10},
+  {g:"Carbs", n:"Bread (1 slice)", c:80, p:4},
+  {g:"Carbs", n:"Sweet potato (1 medium)", c:130, p:2},
+  {g:"Veg & fruit", n:"Spinach (1 cup)", c:7, p:1},
+  {g:"Veg & fruit", n:"Frozen veg (1 cup)", c:75, p:3},
+  {g:"Veg & fruit", n:"Banana (1)", c:105, p:1},
+  {g:"Veg & fruit", n:"Apple (1)", c:95, p:0.5},
+  {g:"Veg & fruit", n:"Berries (1/2 cup)", c:40, p:0.5},
+  {g:"Extras", n:"Cheese, shredded (1/4 cup)", c:110, p:7},
+  {g:"Extras", n:"Oil or butter (1 tbsp)", c:120, p:0},
+  {g:"Extras", n:"Sriracha (1 tsp)", c:5, p:0},
+  {g:"Extras", n:"Takeout meal (estimate)", c:900, p:35}
 ];
 
 function items(dateObj){
@@ -310,6 +329,7 @@ function items(dateObj){
     {g:"Day", id:"snack", t:"Afternoon snack", s:"Before the gym, not after"},
     {g:"Day", id:"stepsok", t:"8–10k steps"},
     {g:"Training", id:"gym", t: WORKOUTS[d], s: weekday ? "60–75 min" : "Optional"},
+    ...(d===5 ? [{g:"Training", id:"sprints", t:"Sprints", s:"6–8 × 10 s at 80–90%, walk 60–90 s between"}] : []),
     {g:"Evening", id:"dinner", t:"Prepped dinner, no takeout"},
     {g:"Evening", id:"protein", t:"Hit protein (150 g)"},
     {g:"Evening", id:"learn", t:"30 min learning", s:"3 nights a week"},
@@ -318,7 +338,7 @@ function items(dateObj){
     {g:"Night", id:"phone", t:"Phone away from bed"},
     {g:"Night", id:"bed", t:"In bed by 11", s:"Ticks itself when you log bed time"}
   ];
-  if (d===1 || d===4) list.splice(11,0,{g:"Night", id:"adapalene", t:"Adapalene", s:"Over moisturizer, pea-sized"});
+  if (d===1 || d===4) list.splice(list.findIndex(i=>i.id==="skinpm")+1,0,{g:"Night", id:"adapalene", t:"Adapalene", s:"Over moisturizer, pea-sized"});
   if (!weekday) return list.filter(i => !["lunch","snack","pack"].includes(i.id) || d===0 && i.id==="pack");
   return list;
 }
@@ -375,7 +395,7 @@ function renderHeader(){
   const list = items(cur), dd = day(k);
   const done = list.filter(i => dd.checks[i.id]).length;
   $("scoreBig").innerHTML = done + "<small>/" + list.length + "</small>";
-  const cal = dd.food.reduce((a,f)=>a+f.c,0), pro = dd.food.reduce((a,f)=>a+f.p,0);
+  const cal = Math.round(dd.food.reduce((a,f)=>a+f.c,0)), pro = Math.round(dd.food.reduce((a,f)=>a+f.p,0));
   $("scoreSide").innerHTML = "<b>"+cal.toLocaleString()+"</b> cal<br><b>"+pro+"</b> g protein";
   $("session").textContent = "Training: " + WORKOUTS[cur.getDay()];
 }
@@ -403,21 +423,47 @@ function renderChecklist(){
   $("slept").textContent = fmtH(sleptFor(k));
 }
 
+const r1 = v => Math.round(v*10)/10;
+function allFoods(){ return FOODS.concat((state.foods||[]).map(f => ({...f, g:"My foods", mine:true}))); }
+function renderQuick(){
+  const dd = day(key(cur)), counts = {};
+  dd.food.forEach(f => counts[f.n] = (counts[f.n]||0)+1);
+  const wrap = $("quick"); wrap.innerHTML = "";
+  let lastG = null, grid = null;
+  allFoods().forEach(m => {
+    if (m.g !== lastG){ const t=document.createElement("div"); t.className="foodgroup"; t.textContent=m.g; wrap.appendChild(t); grid=document.createElement("div"); grid.className="quick"; wrap.appendChild(grid); lastG=m.g; }
+    const b = document.createElement("button");
+    const bn = document.createElement("b"); bn.textContent = m.n;
+    const bs = document.createElement("span"); bs.textContent = m.c+" cal, "+r1(m.p)+" g";
+    b.append(bn, bs);
+    if (counts[m.n]) { const c=document.createElement("i"); c.textContent="×"+counts[m.n]; b.appendChild(c); }
+    b.onclick = () => addFood({n:m.n, c:m.c, p:m.p});
+    if (m.mine) {
+      const del=document.createElement("span"); del.className="del"; del.textContent="🗑"; del.setAttribute("role","button"); del.setAttribute("aria-label","Delete saved food "+m.n);
+      del.onclick = e => { e.stopPropagation(); if (confirm("Remove "+m.n+" from your saved foods?")) { state.foods = state.foods.filter(f => f.n!==m.n); save(); renderQuick(); } };
+      b.appendChild(del);
+    }
+    grid.appendChild(b);
+  });
+}
 function renderFood(){
   const dd = day(key(cur));
-  const cal = dd.food.reduce((a,f)=>a+f.c,0), pro = dd.food.reduce((a,f)=>a+f.p,0);
+  const cal = Math.round(dd.food.reduce((a,f)=>a+f.c,0)), pro = Math.round(dd.food.reduce((a,f)=>a+f.p,0));
   $("calNow").textContent = cal.toLocaleString(); $("proNow").textContent = pro;
   const cb = $("calBar"), pb = $("proBar");
   cb.style.width = Math.min(100, cal/2000*100)+"%"; cb.className = cal>2100 ? "over" : (cal>=1900 ? "hit" : "");
   pb.style.width = Math.min(100, pro/150*100)+"%"; pb.className = pro>=150 ? "hit" : "";
+  renderQuick();
   const log = $("log"); log.innerHTML = "";
-  if (!dd.food.length){ log.innerHTML = '<div class="empty" style="padding:12px 14px">Nothing logged yet. Tap a meal above.</div>'; }
-  dd.food.forEach((f, idx) => {
+  if (!dd.food.length){ log.innerHTML = '<div class="empty" style="padding:12px 14px">Nothing logged yet. Tap a food above.</div>'; return; }
+  const groups = [];
+  dd.food.forEach(f => { let g = groups.find(x => x.n===f.n); if(!g){ g={n:f.n,c:0,p:0,k:0}; groups.push(g); } g.c+=f.c; g.p+=f.p; g.k++; });
+  groups.forEach(g => {
     const r = document.createElement("div"); r.className="ent";
-    const n = document.createElement("span"); n.textContent = f.n;
-    const m = document.createElement("em"); m.textContent = f.c+" cal, "+f.p+" g";
-    const x = document.createElement("button"); x.className="x"; x.textContent="×"; x.setAttribute("aria-label","Remove "+f.n);
-    x.onclick = () => { dd.food.splice(idx,1); renderFood(); renderHeader(); save(); };
+    const n = document.createElement("span"); n.textContent = g.n + (g.k>1 ? "  ×"+g.k : "");
+    const m = document.createElement("em"); m.textContent = Math.round(g.c)+" cal, "+r1(g.p)+" g";
+    const x = document.createElement("button"); x.className="x"; x.textContent="−"; x.setAttribute("aria-label","Remove one "+g.n);
+    x.onclick = () => { const i = dd.food.map(f=>f.n).lastIndexOf(g.n); if (i>-1) dd.food.splice(i,1); renderFood(); renderHeader(); save(); };
     r.append(n,m,x); log.appendChild(r);
   });
 }
@@ -496,11 +542,10 @@ $("prev").onclick = () => { cur.setDate(cur.getDate()-1); renderAll(); };
 $("next").onclick = () => { if (key(cur)!==key(today())) { cur.setDate(cur.getDate()+1); renderAll(); } };
 ["wake","bedtime"].forEach(f => $(f).addEventListener("change", e => { const k=key(cur), dd=day(k); const v=e.target.value; if(!v) delete dd[f]; else dd[f]=v; autoTicks(k); save(); renderChecklist(); renderHeader(); }));
 ["weight","steps"].forEach(f => $(f).addEventListener("input", e => { const dd = day(key(cur)); const v = e.target.value.trim(); if (v==="") delete dd[f]; else dd[f] = v; if (f==="steps" && Number(v)>=8000) dd.checks.stepsok = true; save(); if (f==="steps") { renderChecklist(); renderHeader(); } }));
-const quick = $("quick");
-MEALS.forEach(m => { const b = document.createElement("button"); b.innerHTML = "<b></b><span></span>"; b.firstChild.textContent = m.n; b.lastChild.textContent = m.c+" cal, "+m.p+" g"; b.onclick = () => addFood({...m}); quick.appendChild(b); });
 $("cAdd").onclick = () => {
   const n = $("cName").value.trim() || "Other", c = parseInt($("cCal").value)||0, p = parseInt($("cPro").value)||0;
   if (!c && !p) { $("cCal").focus(); return; }
+  if ($("cSave").checked) { state.foods = state.foods || []; if (!state.foods.some(f=>f.n===n) && !FOODS.some(f=>f.n===n)) state.foods.push({n,c,p}); $("cSave").checked = false; }
   addFood({n,c,p}); $("cName").value=$("cCal").value=$("cPro").value="";
 };
 $("waistAdd").onclick = () => {
