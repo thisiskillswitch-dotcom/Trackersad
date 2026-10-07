@@ -181,6 +181,15 @@ details.goal .item{border-top:1px solid var(--line)}
 .trend .th span{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:17px}
 .trend .th small{font-size:13px;color:var(--muted)}
 .trend svg{width:100%;height:auto;display:block;margin-top:4px}
+.hist{background:var(--card);border:1px solid var(--line);border-radius:12px}
+.hrow{display:grid;grid-template-columns:12px 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hrow .dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.hrow .dot.good{background:var(--pitch2)} .hrow .dot.warn{background:var(--kit)} .hrow .dot.bad{background:var(--danger)}
+.hrow b{display:block;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:17px}
+.hrow span{font-size:13px;color:var(--muted)}
+.hrow em{font-style:normal;text-align:right;font-size:14px;line-height:1.3}
+.day:disabled{opacity:.45;cursor:default}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -242,13 +251,16 @@ details.goal .item{border-top:1px solid var(--line)}
 
   <!-- WEEK -->
   <section id="tab-week" hidden>
-    <h2>Last 7 days</h2>
+    <h2 id="weekTitle">This week</h2>
     <div class="stats" id="stats"></div>
     <div class="days" id="days"></div>
     <h2>On track this week?</h2>
+    <p class="muted" style="margin:0 2px 8px">Monday to Sunday. Adds up every logged day's deficit (maintenance minus what you ate). Today counts once it's over.</p>
     <div id="onTrack"></div>
     <div class="tdee"><label for="tdeeIn">Maintenance estimate</label><input id="tdeeIn" inputmode="numeric" aria-label="Maintenance calories"><span>cal/day</span></div>
     <p class="muted" id="tdeeNote" style="margin:4px 2px 0"></p>
+    <h2>Past weeks</h2>
+    <div class="hist" id="history"></div>
     <h2>Weight trend</h2>
     <div class="chart" id="chart"></div>
     <h2>Weekly averages</h2>
@@ -727,18 +739,21 @@ function renderFood(){
 
 function addFood(f){ day(key(cur)).food.push(f); renderFood(); renderHeader(); save(); }
 
+function monday(d){ const m = new Date(d); m.setHours(12,0,0,0); m.setDate(m.getDate() - ((m.getDay()+6)%7)); return m; }
 function renderWeek(){
-  const t = today(), ds = [];
-  for (let i=6;i>=0;i--){ const d = new Date(t); d.setDate(t.getDate()-i); ds.push(d); }
-  const vals = ds.map(d => state.days[key(d)] || {checks:{},food:[]});
+  const t = today(), mon = monday(t), ds = [];
+  for (let i=0;i<7;i++){ const d = new Date(mon); d.setDate(mon.getDate()+i); ds.push(d); }
+  const sun = ds[6];
+  $("weekTitle").textContent = "This week, " + mon.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " – " + sun.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+  const past = ds.filter(d => d <= t);
+  const vals = past.map(d => state.days[key(d)] || {checks:{},food:[]});
   const avg = arr => { const a = arr.filter(v => v!=null && v!=="" && !isNaN(v)).map(Number); return a.length ? a.reduce((x,y)=>x+y,0)/a.length : null; };
-  const w = avg(vals.map(v=>v.weight)), s = avg(ds.map(d=>sleptFor(key(d))));
-  const gyms = ds.filter((d,i)=>vals[i].checks.gym && d.getDay()>=1 && d.getDay()<=5).length;
+  const w = avg(vals.map(v=>v.weight)), s = avg(past.map(d=>sleptFor(key(d))));
+  const gyms = past.filter((d,i)=>vals[i].checks.gym && d.getDay()>=1 && d.getDay()<=5).length;
   const proDays = vals.filter(v=>v.food.length).map(v=>v.food.reduce((a,f)=>a+f.p,0));
   const p = proDays.length ? proDays.reduce((a,b)=>a+b,0)/proDays.length : null;
-  // previous week weight
   const pw = [];
-  for (let i=13;i>=7;i--){ const d = new Date(t); d.setDate(t.getDate()-i); const v = state.days[key(d)]; if (v && v.weight) pw.push(Number(v.weight)); }
+  for (let i=1;i<=7;i++){ const d = new Date(mon); d.setDate(mon.getDate()-i); const v = state.days[key(d)]; if (v && v.weight) pw.push(Number(v.weight)); }
   const prevW = pw.length ? pw.reduce((a,b)=>a+b,0)/pw.length : null;
   const change = (w!=null && prevW!=null) ? (w-prevW) : null;
   $("stats").innerHTML = [
@@ -748,12 +763,17 @@ function renderWeek(){
     [p!=null ? Math.round(p) : "—", "Avg protein (g), aim 150"]
   ].map(([b,sp]) => '<div class="stat"><b>'+b+'</b><span>'+sp+'</span></div>').join("");
   const days = $("days"); days.innerHTML = "";
-  ds.forEach((d,i) => {
-    const list = items(d), done = list.filter(it => vals[i].checks[it.id]).length;
+  ds.forEach(d => {
     const b = document.createElement("button"); b.className = "day" + (key(d)===key(cur) ? " today" : "");
-    b.innerHTML = d.toLocaleDateString(undefined,{weekday:"short"}).slice(0,3) + "<b>" + Math.round(done/list.length*100) + "%</b>";
-    b.setAttribute("aria-label", d.toDateString()+", "+done+" of "+list.length+" done");
-    b.onclick = () => { cur = new Date(d); showTab("today"); renderAll(); };
+    const lbl = d.toLocaleDateString(undefined,{weekday:"short"}).slice(0,3);
+    if (d > t){ b.disabled = true; b.innerHTML = lbl + "<b>—</b>"; b.setAttribute("aria-label", d.toDateString()+", not yet"); }
+    else {
+      const v = state.days[key(d)] || {checks:{},food:[]};
+      const list = items(d), done = list.filter(it => v.checks[it.id]).length;
+      b.innerHTML = lbl + "<b>" + Math.round(done/list.length*100) + "%</b>";
+      b.setAttribute("aria-label", d.toDateString()+", "+done+" of "+list.length+" done");
+      b.onclick = () => { cur = new Date(d); showTab("today"); renderAll(); };
+    }
     days.appendChild(b);
   });
   renderOnTrack(); renderChart(); renderTrends();
@@ -797,42 +817,65 @@ function learnedTDEE(){
   const lossPerDay = (avg(firstW) - avg(lastW)) / spanDays;
   return Math.round(avg(cals) + lossPerDay*KCAL_PER_KG);
 }
+const TARGET_KG = 0.75; // middle of the 0.5–1 kg a week plan
+// Totals for one Monday–Sunday week. Only finished days count (today is still in progress).
+function weekStats(mon){
+  const tdee = Number(state.tdee) || DEFAULT_TDEE, t = today();
+  let deficit = 0, eaten = 0, logged = 0, done = 0; const ws = [];
+  for (let i=0;i<7;i++){
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const o = dayStats(d);
+    if (o.w!=null && d <= t) ws.push(o.w);
+    if (d >= t) continue;
+    done++;
+    if (o.cal!=null){ logged++; eaten += o.cal; deficit += tdee - o.cal; }
+  }
+  return {mon, done, logged, eaten, deficit, w: ws.length ? ws.reduce((a,b)=>a+b,0)/ws.length : null, wN: ws.length};
+}
+function judge(expected, actual){
+  if (expected==null && actual==null) return ["", "Not enough data yet"];
+  if (actual==null) return expected>=0.5 && expected<=1.1 ? ["good","Calories on track"] : expected<0.5 ? ["warn","Deficit is small"] : ["warn","Deficit is big"];
+  if (expected==null) return actual>=0.5 && actual<=1 ? ["good","Scale on track"] : actual>1 ? ["warn","Losing fast"] : ["warn","Scale is slow"];
+  if (actual > 1.2) return ["warn","Losing faster than planned"];
+  if (actual >= 0.5) return ["good","On track"];
+  if (expected < 0.5) return ["bad","Not enough of a deficit"];
+  if (actual - expected < -0.4) return ["warn","Scale is behind your calories"];
+  return ["warn","A bit slow"];
+}
+const kg = v => (v>=0?"−":"+") + Math.abs(v).toFixed(2) + " kg";
 function renderOnTrack(){
-  const t = today();
-  const s7 = new Date(t); s7.setDate(t.getDate()-6);
-  const s14 = new Date(t); s14.setDate(t.getDate()-13);
-  const cur7 = rangeAvg(s7,7), prev7 = rangeAvg(s14,7);
-  const tdee = Number(state.tdee) || DEFAULT_TDEE;
+  const t = today(), mon = monday(t), tdee = Number(state.tdee) || DEFAULT_TDEE;
+  const prevMon = new Date(mon); prevMon.setDate(mon.getDate()-7);
+  const wk = weekStats(mon), prev = weekStats(prevMon);
   const box = $("onTrack"); box.innerHTML = "";
   const v = document.createElement("div"); v.className = "verdict";
   const head = document.createElement("b"), note = document.createElement("p");
   v.append(head, note);
   const g = document.createElement("div"); g.className = "vgrid";
   const tile = (val, lbl) => { const d=document.createElement("div"); const b=document.createElement("b"); b.textContent=val; const sp=document.createElement("span"); sp.textContent=lbl; d.append(b,sp); g.appendChild(d); };
-  const calOK = cur7.cal && cur7.cal.n >= 4;
-  const wOK = cur7.w && prev7.w && cur7.w.n >= 2 && prev7.w.n >= 2;
-  const expected = calOK ? (tdee - cur7.cal.v)*7/KCAL_PER_KG : null;   // kg lost per week
-  const actual = wOK ? prev7.w.v - cur7.w.v : null;                     // kg lost (positive = lost)
-  tile(calOK ? Math.round(cur7.cal.v).toLocaleString() : "—", "Avg calories, " + (cur7.cal ? cur7.cal.n : 0) + " days logged");
-  tile(calOK ? (Math.round(tdee - cur7.cal.v)).toLocaleString() : "—", "Daily deficit vs " + tdee.toLocaleString());
-  tile(expected!=null ? (expected>=0?"−":"+") + Math.abs(expected).toFixed(2) + " kg" : "—", "Calories say you should lose");
-  tile(actual!=null ? (actual>=0?"−":"+") + Math.abs(actual).toFixed(2) + " kg" : "—", "Scale says (avg vs last week)");
-  let cls = "", h = "", n = "";
-  if (!calOK && !wOK){ h = "Not enough data yet"; n = "Log food on at least 4 days and weigh in at least twice this week and last week."; }
-  else if (!wOK){
-    h = expected >= 0.5 && expected <= 1.1 ? "Calories look on track" : expected < 0.5 ? "Deficit looks small" : "Deficit looks big";
-    cls = expected >= 0.5 && expected <= 1.1 ? "good" : "warn";
-    n = "Your calories point to about " + expected.toFixed(2) + " kg a week. Weigh in a few mornings this week and last to check it against the scale.";
-  } else if (!calOK){
-    h = actual >= 0.5 && actual <= 1 ? "Scale is on track" : actual > 1 ? "Losing fast" : "Scale is slow"; cls = actual >= 0.5 && actual <= 1 ? "good" : "warn";
-    n = "Weight moved " + actual.toFixed(2) + " kg. Log food on more days to see whether calories match.";
-  } else {
-    const gap = actual - expected;
-    if (actual > 1.2){ cls="warn"; h = "Losing faster than planned"; n = "Over 1 kg a week can cost muscle. Fine for week one (water), but if it repeats, add 100–150 cal."; }
-    else if (actual >= 0.5){ cls="good"; h = "On track"; n = "Scale and calories agree. Keep doing what you're doing."; }
-    else if (expected >= 0.5 && gap < -0.4){ cls="warn"; h = "Scale is behind your calories"; n = "Usually water, salt or under-logged food (sauces, oils, snacks). Give it another week before changing anything. Stuck 2 weeks? Drop ~150 cal or add steps."; }
-    else if (expected < 0.5){ cls="bad"; h = "Not enough of a deficit"; n = "Your calories only support about " + Math.max(0,expected).toFixed(2) + " kg a week. Tighten up to 1,900–2,000 or add steps."; }
-    else { cls="warn"; h = "A bit slow"; n = "Lost " + actual.toFixed(2) + " kg. Normal week-to-week noise. Stay consistent and check again next week."; }
+  const soFar = wk.deficit / KCAL_PER_KG;
+  const pace = wk.logged ? (wk.deficit / wk.logged) * 7 / KCAL_PER_KG : null;     // full week if you keep this up
+  const actual = (wk.w!=null && prev.w!=null && prev.wN>=2) ? prev.w - wk.w : null;
+  tile(wk.logged ? Math.round(wk.eaten).toLocaleString() : "—", "Eaten this week, " + wk.logged + " of " + wk.done + " finished days logged");
+  tile(wk.logged ? Math.round(wk.deficit).toLocaleString() : "—", "Total deficit so far (" + tdee.toLocaleString() + "/day maintenance)");
+  tile(wk.logged ? kg(soFar) : "—", "Fat that deficit equals (÷ 7,700)");
+  tile(actual!=null ? kg(actual) : "—", "Scale: avg this week vs last week");
+  const [cls, h] = judge(wk.logged >= 2 ? pace : null, actual);
+  let n = "";
+  if (!wk.done) n = "It's Monday. Totals start counting tomorrow, once today is finished. Last week's result is in Past weeks below.";
+  else if (!wk.logged) n = "No food logged for this week's finished days yet.";
+  else {
+    n = "So far: " + Math.round(wk.deficit).toLocaleString() + " cal under maintenance = about " + soFar.toFixed(2) + " kg of fat. ";
+    if (wk.done < 7) n += "At this pace you'll finish Sunday around " + Math.round(pace*KCAL_PER_KG).toLocaleString() + " cal (" + pace.toFixed(2) + " kg). ";
+    const left = 7 - wk.done, need = TARGET_KG*KCAL_PER_KG - wk.deficit;
+    if (left > 0){
+      const perDay = Math.round(tdee - need/left);
+      if (need <= 0) n += "You've already hit this week's " + TARGET_KG + " kg target.";
+      else if (perDay < 1500) n += "Too far behind to catch up safely. Stick to 1,900–2,000 a day and let this week land where it lands.";
+      else n += "To reach " + TARGET_KG + " kg (" + Math.round(TARGET_KG*KCAL_PER_KG).toLocaleString() + " cal) by Sunday, eat about " + perDay.toLocaleString() + " a day for the last " + left + " day" + (left>1?"s":"") + ".";
+    }
+    if (wk.logged < wk.done) n += " " + (wk.done - wk.logged) + " finished day" + (wk.done-wk.logged>1?"s aren't":" isn't") + " logged, so they aren't counted.";
+    if (actual==null) n += " Weigh in a few mornings this week and last to compare with the scale.";
   }
   v.className = "verdict " + cls; head.textContent = h; note.textContent = n;
   box.append(v, g);
@@ -841,6 +884,33 @@ function renderOnTrack(){
   $("tdeeNote").textContent = learned
     ? "From your last 4 weeks of logging, your real maintenance looks like about " + learned.toLocaleString() + " cal. Tap it into the box if it seems right."
     : "Starting guess for your size and activity. After 3–4 weeks of logging food and weight, the tracker will suggest a better number.";
+  // past weeks
+  const hist = $("history"); hist.innerHTML = "";
+  let shown = 0;
+  for (let i=1;i<=8;i++){
+    const m = new Date(mon); m.setDate(mon.getDate()-7*i);
+    const pm = new Date(m); pm.setDate(m.getDate()-7);
+    const a = weekStats(m), b = weekStats(pm);
+    if (!a.logged && a.w==null) continue;
+    shown++;
+    const exp = a.logged ? a.deficit / KCAL_PER_KG : null;
+    const act = (a.w!=null && b.w!=null) ? b.w - a.w : null;
+    const full = a.logged >= 6;
+    const [c] = full ? judge(exp, act) : [""];
+    const end = new Date(m); end.setDate(m.getDate()+6);
+    const row = document.createElement("div"); row.className = "hrow";
+    const dot = document.createElement("i"); dot.className = "dot " + c;
+    const mid = document.createElement("div");
+    const t1 = document.createElement("b"); t1.textContent = m.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " – " + end.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    const t2 = document.createElement("span");
+    t2.textContent = a.logged ? Math.round(a.deficit).toLocaleString() + " cal deficit, " + a.logged + "/7 days logged" + (full ? "" : " (incomplete)") : "No food logged";
+    mid.append(t1, t2);
+    const right = document.createElement("em");
+    right.textContent = "Should " + (exp!=null ? kg(exp) : "—") + "\nScale " + (act!=null ? kg(act) : "—");
+    right.style.whiteSpace = "pre-line";
+    row.append(dot, mid, right); hist.appendChild(row);
+  }
+  if (!shown) hist.innerHTML = '<div class="empty" style="padding:12px 14px">Finished weeks show up here every Monday.</div>';
 }
 function renderTrends(){
   const t = today(), mon = new Date(t); mon.setDate(t.getDate() - ((t.getDay()+6)%7));
