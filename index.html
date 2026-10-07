@@ -134,6 +134,53 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
 .sched dt{font-family:"Barlow Condensed",sans-serif;font-weight:600;color:var(--muted)}
 .sched dd{margin:0}
 .save{font-size:12px;color:var(--muted);text-align:right;margin-top:6px;min-height:16px}
+.focuscard{background:var(--pitch);color:#F3F5EF;border-radius:12px;padding:14px 16px;margin-top:16px}
+.focuscard small{color:rgba(243,245,239,.75);font-size:13px;display:block}
+.focuscard b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;color:var(--kit);line-height:1.15;margin:2px 0}
+.nextup{font-size:14px;color:var(--muted);margin:10px 2px 0}
+.nextup strong{color:var(--ink)}
+.prog{display:flex;align-items:center;gap:10px}
+.prog .bar{flex:1;margin:6px 0}
+.prog em{font-style:normal;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;min-width:42px;text-align:right}
+.area{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:15px;color:var(--muted);margin:20px 2px 6px}
+details.goal{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+details.goal summary{list-style:none;cursor:pointer;padding:12px 14px}
+details.goal summary::-webkit-details-marker{display:none}
+details.goal summary:focus-visible{outline:2px solid var(--kit);outline-offset:2px;border-radius:12px}
+.gtop{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.gtop span{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px}
+.gtop small{font-size:13px;color:var(--muted);white-space:nowrap}
+.gwhy{font-size:13px;color:var(--muted);margin-top:2px}
+details.goal .item{border-top:1px solid var(--line)}
+.item.late .txt small{color:var(--danger)}
+.phase{position:relative;padding:0 0 16px 22px;border-left:3px solid var(--line);margin-left:8px}
+.phase::before{content:"";position:absolute;left:-9px;top:3px;width:15px;height:15px;border-radius:50%;background:var(--card);border:3px solid var(--line)}
+.phase.now{border-left-color:var(--kit)}
+.phase.now::before{background:var(--kit);border-color:var(--kit)}
+.phase.past::before{background:var(--pitch2);border-color:var(--pitch2)}
+.phase h3{margin:0 0 2px}
+.phase h3 small{font-family:Barlow,sans-serif;font-weight:400;font-size:13px;color:var(--muted);margin-left:6px}
+.phase ul{margin:4px 0 0;padding-left:18px;font-size:15px}
+.subtabs{display:flex;gap:6px;margin-top:16px}
+.subtabs button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 0;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;color:var(--muted);cursor:pointer;min-height:44px}
+.subtabs button[aria-pressed="true"]{background:var(--pitch);color:#F3F5EF;border-color:var(--pitch)}
+.verdict{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--slate);border-radius:12px;padding:12px 14px}
+.verdict.good{border-left-color:var(--pitch2)}
+.verdict.warn{border-left-color:var(--kit)}
+.verdict.bad{border-left-color:var(--danger)}
+.verdict b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;line-height:1.15}
+.verdict p{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.vgrid div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.vgrid b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;line-height:1.1}
+.vgrid span{font-size:13px;color:var(--muted)}
+.tdee{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px;color:var(--muted)}
+.tdee input{width:90px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+.trend{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.trend .th{display:flex;justify-content:space-between;align-items:baseline}
+.trend .th span{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:17px}
+.trend .th small{font-size:13px;color:var(--muted)}
+.trend svg{width:100%;height:auto;display:block;margin-top:4px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -198,14 +245,66 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
     <h2>Last 7 days</h2>
     <div class="stats" id="stats"></div>
     <div class="days" id="days"></div>
+    <h2>On track this week?</h2>
+    <div id="onTrack"></div>
+    <div class="tdee"><label for="tdeeIn">Maintenance estimate</label><input id="tdeeIn" inputmode="numeric" aria-label="Maintenance calories"><span>cal/day</span></div>
+    <p class="muted" id="tdeeNote" style="margin:4px 2px 0"></p>
     <h2>Weight trend</h2>
     <div class="chart" id="chart"></div>
+    <h2>Weekly averages</h2>
+    <p class="muted" style="margin:0 2px 8px">Per day, Monday to Sunday, last 8 weeks. Only days you logged count. The dashed line is your target.</p>
+    <div id="trends"></div>
     <h2>Waist (every 2 weeks)</h2>
     <div class="custom" style="grid-template-columns:1fr auto">
       <input id="waist" inputmode="decimal" placeholder="Waist in inches, e.g. 33.5" aria-label="Waist in inches">
       <button class="btn" id="waistAdd">Log waist</button>
     </div>
     <div class="log" id="waistLog"></div>
+  </section>
+
+  <!-- GOALS -->
+  <section id="tab-goals" hidden>
+    <div class="focuscard"><small>Main focus right now</small><b id="focusTitle"></b><small id="focusNote"></small></div>
+    <p class="nextup" id="nextUp"></p>
+    <div class="subtabs" role="group" aria-label="Goals view">
+      <button data-gv="list" aria-pressed="true">Goals</button>
+      <button data-gv="time" aria-pressed="false">Timeline</button>
+      <button data-gv="fit" aria-pressed="false">How it fits</button>
+    </div>
+    <div id="gv-list">
+      <h2>All goals</h2>
+      <div class="prog"><div class="bar"><i id="allBar" style="width:0"></i></div><em id="allPct">0%</em></div>
+      <p class="muted" style="margin:2px 2px 0">Tap a goal to see its steps. Dates are targets, not hard deadlines.</p>
+      <div id="goalList"></div>
+    </div>
+    <div id="gv-time" hidden>
+      <h2>Timeline</h2>
+      <p class="muted" style="margin:0 2px 12px">One main thing at a time. The yellow phase is where you are now.</p>
+      <div id="phaseList"></div>
+    </div>
+    <div id="gv-fit" hidden>
+      <h2>Where it goes in your day</h2>
+      <div class="plan">
+        <dl class="sched">
+          <dt>Ride</dt><dd>15 min English reading</dd>
+          <dt>Lunch</dt><dd>20 min learning, 2–3 days (tutorials or theory)</dd>
+          <dt>Work</dt><dd>Write your own emails first. AI only checks them.</dd>
+          <dt>8:00</dt><dd>Tue + Thu: 1 h focus block (SolidWorks, Ansys, MATLAB). Other nights: rest.</dd>
+          <dt>Sat</dt><dd>Main 2–3 h block. Travel weekend: videos and reading only.</dd>
+          <dt>Sun</dt><dd>Weigh-in, waist, 10 min weekly review</dd>
+        </dl>
+        <p class="muted">These show up in your Today checklist under "Growth" on the right days.</p>
+      </div>
+      <h2>Rules</h2>
+      <div class="plan"><ul>
+        <li><b>One main thing at a time:</b> CSWA, then Ansys, then the pendulum.</li>
+        <li><b>5–6 hours a week</b> during co-op terms. Skipped a block? Move it once, don't stack it.</li>
+        <li><b>School wins in study terms.</b> Pause the project during exams.</li>
+        <li><b>One project, four goals:</b> the pendulum is your portfolio, research, conference talk and presentation practice.</li>
+        <li><b>Cut first if busy:</b> CSWP, double-pendulum hardware, part-time job if a scholarship comes through.</li>
+        <li><b>Protect two weekend mornings a month</b> on travel-heavy months.</li>
+      </ul></div>
+    </div>
   </section>
 
   <!-- PLAN -->
@@ -220,7 +319,7 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
         <dt>6:00</dt><dd>Gym, 60–75 min</dd>
         <dt>7:15</dt><dd>Vega shake on the bus home</dd>
         <dt>7:45</dt><dd>Reheat prepped dinner</dd>
-        <dt>8:00</dt><dd>30 min learning, 3 nights a week</dd>
+        <dt>8:00</dt><dd>Tue + Thu: 1 h focus block (see Goals)</dd>
         <dt>8:30</dt><dd>Free time</dd>
         <dt>10:15</dt><dd>Shower, skincare, pack tomorrow's bag, phone away</dd>
         <dt>11:00</dt><dd>Sleep</dd>
@@ -284,6 +383,7 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
   <button role="tab" data-tab="today" aria-selected="true">Today</button>
   <button role="tab" data-tab="food" aria-selected="false">Food</button>
   <button role="tab" data-tab="week" aria-selected="false">Week</button>
+  <button role="tab" data-tab="goals" aria-selected="false">Goals</button>
   <button role="tab" data-tab="plan" aria-selected="false">Plan</button>
 </div></nav>
 
@@ -332,18 +432,175 @@ function items(dateObj){
     ...(d===5 ? [{g:"Training", id:"sprints", t:"Sprints", s:"6–8 × 10 s at 80–90%, walk 60–90 s between"}] : []),
     {g:"Evening", id:"dinner", t:"Prepped dinner, no takeout"},
     {g:"Evening", id:"protein", t:"Hit protein (150 g)"},
-    {g:"Evening", id:"learn", t:"30 min learning", s:"3 nights a week"},
     {g:"Night", id:"skinpm", t:"Skin PM", s:"Cleanser, moisturizer, lip balm"},
     {g:"Night", id:"pack", t:"Pack tomorrow's bag"},
     {g:"Night", id:"phone", t:"Phone away from bed"},
     {g:"Night", id:"bed", t:"In bed by 11", s:"Ticks itself when you log bed time"}
   ];
+  const growth = [];
+  if (weekday){
+    growth.push({g:"Growth", id:"read", t:"15 min English reading", s:"On the ride to work"});
+    growth.push({g:"Growth", id:"lunchlearn", t:"20 min learning at lunch", s:"Current focus: " + currentFocus().t});
+    growth.push({g:"Growth", id:"ownemail", t:"Wrote my own emails first", s:"AI only checks them"});
+  }
+  if (d===2 || d===4) growth.push({g:"Growth", id:"learn", t:"Focus block, 8:00–9:00", s:"Hands-on: " + currentFocus().t});
+  if (d===6) growth.push({g:"Growth", id:"mainblock", t:"Main 2–3 h block", s:"Travel weekend? Videos and reading only"});
+  if (d===0) growth.push({g:"Growth", id:"review", t:"10 min weekly review", s:"What got done, what slipped, next week's focus"});
+  const ni = list.findIndex(i => i.g==="Night");
+  list.splice(ni, 0, ...growth);
   if (d===1 || d===4) list.splice(list.findIndex(i=>i.id==="skinpm")+1,0,{g:"Night", id:"adapalene", t:"Adapalene", s:"Over moisturizer, pea-sized"});
   if (!weekday) return list.filter(i => !["lunch","snack","pack"].includes(i.id) || d===0 && i.id==="pack");
   return list;
 }
 
-let state = {days:{}, waist:[]};
+const GOALS = [
+ {area:"School and money", id:"gpa", title:"4.3 GPA year", when:"Sep 2027 – Apr 2028", why:"Fall 2027 + Winter 2028. Gets at least $7,000 in scholarships and opens every other door.", ms:[
+  ["gpa1","Set up a study system before term starts","2027-09-08"],
+  ["gpa0","Meet an advisor about the math minor and DTME","2027-09-30"],
+  ["gpa2","Every Fall assignment handed in on time","2027-12-20"],
+  ["gpa3","Fall term: 4.3","2027-12-31"],
+  ["gpa4","Submit scholarship application (Jan 1 – Apr 15)","2028-04-15"],
+  ["gpa5","Winter term: 4.3","2028-04-30"]]},
+ {area:"School and money", id:"money", title:"Pay for school", when:"Ongoing", why:"Fall tuition is about $14k a semester.", ms:[
+  ["mon1","Set up a weekly VFV contribution in your TFSA","2026-11-01"],
+  ["mon2","Plan Fall 2027 tuition from co-op savings","2027-08-31"],
+  ["mon3","Find a chill part-time job, max 10 h/week (RA role ideal)","2027-09-30"]]},
+ {area:"Career", id:"coop", title:"Summer 2027 co-op, new company", when:"Apply Jan – Mar", why:"Aerospace, clean energy, EV or advanced manufacturing. Toronto or Montreal.", ms:[
+  ["co1","Resume and cover letter updated with IFS work","2026-12-15"],
+  ["co2","15 applications sent","2027-01-31"],
+  ["co3","40+ applications sent","2027-03-15"],
+  ["co4","Offer accepted","2027-04-15"]]},
+ {area:"Career", id:"ifs", title:"Finish strong at IFS", when:"Now – Apr 2027", why:"A great reference from Jennifer helps every application after this.", ms:[
+  ["ifs1","Give a short update in a team meeting","2027-03-31"],
+  ["ifs2","Ask Jennifer for a reference","2027-04-15"],
+  ["ifs3","End-of-term presentation of your work","2027-04-30"]]},
+ {area:"Certifications", id:"cswa", title:"Official SolidWorks CSWA", when:"By Dec 2026", why:"Your current certificate isn't the official Dassault one. Employers look for CSWA.", ms:[
+  ["sw1","Install SolidWorks (student license)","2026-10-20"],
+  ["sw2","Work through the official sample exam","2026-11-01"],
+  ["sw3","Two timed practice exams","2026-11-25"],
+  ["sw4","Pass the CSWA","2026-12-12"],
+  ["sw5","Optional: CSWP","2027-08-31"]]},
+ {area:"Certifications", id:"ansys", title:"Ansys Associate certification", when:"Jan – Feb 2027", why:"FEA stands out for aerospace and design roles.", ms:[
+  ["an1","Install Ansys Student (not Discovery)","2027-01-05"],
+  ["an2","Finish the free learning track","2027-02-10"],
+  ["an3","Pass the Associate exam","2027-02-28"]]},
+ {area:"Project and research", id:"pend", title:"Double inverted pendulum", when:"Nov 2026 – Apr 2028", why:"Your portfolio project. Uses SolidWorks, Ansys, MATLAB and Arduino together.", ms:[
+  ["pe0","MATLAB Onramp and Simulink Onramp (free)","2026-12-20"],
+  ["pe1","Derive single-pendulum equations","2027-03-15"],
+  ["pe2","Simulate single pendulum with LQR","2027-03-31"],
+  ["pe3","Simulate double pendulum","2027-04-30"],
+  ["pe4","Design the cart and parts in SolidWorks","2027-06-15"],
+  ["pe5","FEA on a bracket in Ansys","2027-06-30"],
+  ["pe6","Build and balance the single pendulum","2027-08-31"],
+  ["pe7","Stretch: double-pendulum hardware","2028-04-30"]]},
+ {area:"Project and research", id:"res", title:"Research and a conference talk", when:"Oct 2026 – 2028", why:"Like Ahmed. Turn the pendulum into research with a professor.", ms:[
+  ["re1","Message Ahmed about how he did it","2026-10-31"],
+  ["re2","Shortlist 5 UNB profs (controls, robotics, dynamics)","2027-03-31"],
+  ["re3","Email them pitching the pendulum project","2027-04-30"],
+  ["re4","Supervisor confirmed for Fall 2027","2027-08-31"],
+  ["re5","Abstract submitted (CSME or CASI)","2028-04-30"],
+  ["re6","Present at the conference","2028-10-31"]]},
+ {area:"Communication", id:"email", title:"Write emails without AI", when:"Oct – Dec 2026", why:"Confidence comes from reps. You send emails every day at work anyway.", ms:[
+  ["em1","30 days writing every email yourself first","2026-11-15"],
+  ["em2","Phrase bank on your phone with 30 phrases","2026-12-31"],
+  ["em3","Send a full week of emails with no AI check","2027-01-31"]]},
+ {area:"Communication", id:"present", title:"English and presentation skills", when:"Ongoing", why:"Builds toward the conference talk.", ms:[
+  ["pr1","15 min English reading most days for 6 weeks","2026-11-30"],
+  ["pr2","Visit a Toastmasters club","2027-01-31"],
+  ["pr3","Record a 3-minute talk and rewatch it","2027-02-28"],
+  ["pr4","Present the pendulum at a UNB showcase","2028-03-31"]]},
+ {area:"Fitness", id:"fit", title:"Cut fat, keep building muscle", when:"Ongoing", why:"Lean, athletic soccer-player-who-lifts look. Daily tracking lives in Today, Food and Week.", ms:[
+  ["fi1","Take starting progress photos","2026-10-15"],
+  ["fi2","Join the Saint John football group","2026-10-31"],
+  ["fi3","Beat bench 70 kg × 7","2026-11-30"],
+  ["fi4","4 gym days a week for 8 weeks straight","2026-12-01"],
+  ["fi5","First 5 kg down from 84 kg","2027-01-15"],
+  ["fi6","Compare progress photos","2027-01-15"]]},
+ {area:"Life", id:"drive", title:"NB licence and first car", when:"Nov 2026 – Aug 2027", why:"Cheapest route to a licence, then a used car ($5–7k) that lasts 3+ years.", ms:[
+  ["dr1","Ask Service NB if your Dubai licence history counts","2026-11-15"],
+  ["dr2","Pass the knowledge test","2027-01-31"],
+  ["dr3","Pass the road test","2027-05-31"],
+  ["dr4","Buy the car (wait if summer co-op is in Toronto)","2027-08-31"]]}
+];
+const PHASES = [
+ {from:"2026-10-01",to:"2026-12-31",t:"IFS Fall term",s:"Oct – Dec 2026",i:["CSWA, exam by early Dec","Message Ahmed","MATLAB/Simulink Onramps on lunch breaks","Write your own emails, start a phrase bank","Football group, steady gym routine","Licence: check with Service NB","Resume ready by Dec 15"]},
+ {from:"2027-01-01",to:"2027-04-30",t:"IFS Winter term",s:"Jan – Apr 2027",i:["Summer co-op applications come first","Ansys Associate by end of Feb","Pendulum simulation (Mar – Apr)","Email professors in April","Present at work, ask Jennifer for a reference","Licence knowledge test"]},
+ {from:"2027-05-01",to:"2027-08-31",t:"Summer co-op",s:"May – Aug 2027",i:["Build the single pendulum (SolidWorks + Ansys)","Lock in a research supervisor","Road test, car if it makes sense","Save for Fall tuition, line up a part-time job","Optional: CSWP"]},
+ {from:"2027-09-01",to:"2028-04-30",t:"Study terms",s:"Sep 2027 – Apr 2028",i:["4.3 GPA comes first","Pendulum research, ~3 h/week, pause in exams","Double pendulum after Auto Controls","Scholarship application by Apr 15","Conference abstract"]},
+ {from:"2028-05-01",to:"2028-12-31",t:"After",s:"2028",i:["Present at the conference","2028 co-op search with a stronger profile"]}
+];
+const FOCUS = [
+ {to:"2026-12-15",t:"SolidWorks CSWA",n:"Exam by early December. Lunch slots: MATLAB Onramp."},
+ {to:"2027-02-28",t:"Ansys + co-op applications",n:"Applications come first in Jan – Mar."},
+ {to:"2027-04-30",t:"Pendulum simulation + applications",n:"Also email professors in April."},
+ {to:"2027-08-31",t:"Build the single pendulum",n:"During your summer co-op, weekends only."},
+ {to:"2028-04-30",t:"4.3 GPA",n:"Pendulum research about 3 h/week. Pause in exams."},
+ {to:"2099-01-01",t:"Conference + 2028 co-op",n:"Present your work."}
+];
+const todayKey = () => { const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); };
+function currentFocus(){ const k = todayKey(); return FOCUS.find(f => k <= f.to); }
+const fmtD = s => new Date(s+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+const openGoals = new Set();
+function renderGoals(){
+  const tk = todayKey(), f = currentFocus();
+  $("focusTitle").textContent = f.t; $("focusNote").textContent = f.n;
+  const pending = [];
+  GOALS.forEach(g => g.ms.forEach(m => { if (!state.ms[m[0]]) pending.push(m); }));
+  pending.sort((a,b) => a[2].localeCompare(b[2]));
+  const nu = $("nextUp"); nu.textContent = "";
+  if (pending.length){
+    const p = pending[0], days = Math.round((new Date(p[2]+"T12:00:00") - new Date(tk+"T12:00:00"))/86400000);
+    const st = document.createElement("strong"); st.textContent = p[1];
+    nu.append("Next up: ", st, " (" + (days<0 ? Math.abs(days)+" days overdue" : days===0 ? "today" : "in "+days+" days") + ")");
+  } else nu.textContent = "Every step is done.";
+  const box = $("goalList"); box.innerHTML = "";
+  let all=0, done=0, lastA="";
+  GOALS.forEach(g => {
+    if (g.area !== lastA){ const a=document.createElement("div"); a.className="area"; a.textContent=g.area; box.appendChild(a); lastA=g.area; }
+    const gd = g.ms.filter(m => state.ms[m[0]]).length; all += g.ms.length; done += gd;
+    const det = document.createElement("details"); det.className="goal"; det.open = openGoals.has(g.id);
+    det.addEventListener("toggle", () => { det.open ? openGoals.add(g.id) : openGoals.delete(g.id); });
+    const sum = document.createElement("summary");
+    const top = document.createElement("div"); top.className="gtop";
+    const tt = document.createElement("span"); tt.textContent = g.title;
+    const wh = document.createElement("small"); wh.textContent = g.when;
+    top.append(tt, wh);
+    const why = document.createElement("div"); why.className="gwhy"; why.textContent = g.why;
+    const pr = document.createElement("div"); pr.className="prog";
+    pr.innerHTML = '<div class="bar"><i></i></div><em></em>';
+    pr.querySelector("i").style.width = Math.round(gd/g.ms.length*100)+"%";
+    if (gd===g.ms.length) pr.querySelector("i").className = "hit";
+    pr.querySelector("em").textContent = gd+"/"+g.ms.length;
+    sum.append(top, why, pr); det.appendChild(sum);
+    g.ms.forEach(([id,label,due]) => {
+      const lab = document.createElement("label");
+      lab.className = "item" + (state.ms[id] ? " done" : "") + (!state.ms[id] && due < tk ? " late" : "");
+      const cb = document.createElement("input"); cb.type="checkbox"; cb.checked = !!state.ms[id];
+      const bx = document.createElement("span"); bx.className="box";
+      const txt = document.createElement("span"); txt.className="txt";
+      const t = document.createElement("span"); t.textContent = label;
+      const s = document.createElement("small"); s.textContent = "Target: " + fmtD(due);
+      txt.append(t, s);
+      cb.addEventListener("change", () => { if (cb.checked) state.ms[id] = true; else delete state.ms[id]; save(); renderGoals(); });
+      lab.append(cb, bx, txt); det.appendChild(lab);
+    });
+    box.appendChild(det);
+  });
+  const pct = Math.round(done/all*100);
+  $("allBar").style.width = pct+"%"; $("allPct").textContent = pct+"%";
+  const pl = $("phaseList"); pl.innerHTML = "";
+  PHASES.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "phase" + (tk > p.to ? " past" : tk >= p.from ? " now" : "");
+    const h = document.createElement("h3"); h.textContent = p.t;
+    const sm = document.createElement("small"); sm.textContent = p.s; h.appendChild(sm);
+    const ul = document.createElement("ul");
+    p.i.forEach(x => { const li=document.createElement("li"); li.textContent=x; ul.appendChild(li); });
+    d.append(h, ul); pl.appendChild(d);
+  });
+}
+
+let state = {days:{}, waist:[], ms:{}};
 let cur = new Date(); cur.setHours(12,0,0,0);
 let store = null, docRef = null, saveTimer = null;
 
@@ -374,7 +631,7 @@ function autoTicks(k){
   if (w!=null) dd.checks.wake = w <= 6*60+30;
   if (b!=null) dd.checks.bed = b >= 18*60 && b <= 23*60;
 }
-function loadLocal(){ try{ const s = localStorage.getItem("cutTracker"); if(s) state = Object.assign({days:{},waist:[]}, JSON.parse(s)); }catch(e){} }
+function loadLocal(){ try{ const s = localStorage.getItem("cutTracker"); if(s) state = Object.assign({days:{},waist:[],ms:{},tdee:null}, JSON.parse(s)); }catch(e){} }
 function saveLocal(){ try{ localStorage.setItem("cutTracker", JSON.stringify(state)); }catch(e){} }
 
 function save(){
@@ -499,7 +756,7 @@ function renderWeek(){
     b.onclick = () => { cur = new Date(d); showTab("today"); renderAll(); };
     days.appendChild(b);
   });
-  renderChart();
+  renderOnTrack(); renderChart(); renderTrends();
   const wl = $("waistLog"); wl.innerHTML = "";
   if (!state.waist.length) wl.innerHTML = '<div class="empty" style="padding:12px 14px">No waist logged yet. Start at your current size.</div>';
   state.waist.slice().reverse().forEach(e => {
@@ -507,6 +764,126 @@ function renderWeek(){
     const n = document.createElement("span"); n.textContent = e.v + " in";
     const m = document.createElement("em"); m.textContent = e.d;
     r.append(n,m); wl.appendChild(r);
+  });
+}
+
+const KCAL_PER_KG = 7700, DEFAULT_TDEE = 2600;
+function dayStats(d){
+  const v = state.days[key(d)];
+  if (!v) return {};
+  const o = {};
+  if (v.food && v.food.length){ o.cal = v.food.reduce((a,f)=>a+f.c,0); o.pro = v.food.reduce((a,f)=>a+f.p,0); }
+  if (v.steps!=null && v.steps!=="" && !isNaN(v.steps)) o.steps = Number(v.steps);
+  if (v.weight!=null && v.weight!=="" && !isNaN(v.weight)) o.w = Number(v.weight);
+  return o;
+}
+function rangeAvg(start, n){
+  const acc = {cal:[],pro:[],steps:[],w:[]};
+  for (let i=0;i<n;i++){ const d=new Date(start); d.setDate(start.getDate()+i); if (d>today()) break; const o=dayStats(d); for (const k in acc) if (o[k]!=null) acc[k].push(o[k]); }
+  const r = {};
+  for (const k in acc) r[k] = acc[k].length ? {v: acc[k].reduce((a,b)=>a+b,0)/acc[k].length, n: acc[k].length} : null;
+  return r;
+}
+// estimate maintenance from logged data: needs 3+ weeks with food and weight
+function learnedTDEE(){
+  const t = today(), pts = [];
+  for (let i=27;i>=0;i--){ const d=new Date(t); d.setDate(t.getDate()-i); pts.push(dayStats(d)); }
+  const cals = pts.filter(p=>p.cal!=null).map(p=>p.cal);
+  const wIdx = pts.map((p,i)=>p.w!=null?i:-1).filter(i=>i>=0);
+  if (cals.length < 14 || wIdx.length < 6 || wIdx[wIdx.length-1]-wIdx[0] < 14) return null;
+  const firstW = wIdx.slice(0,3).map(i=>pts[i].w), lastW = wIdx.slice(-3).map(i=>pts[i].w);
+  const avg = a => a.reduce((x,y)=>x+y,0)/a.length;
+  const spanDays = ((wIdx[wIdx.length-1]+wIdx[wIdx.length-2]+wIdx[wIdx.length-3]) - (wIdx[0]+wIdx[1]+wIdx[2]))/3;
+  const lossPerDay = (avg(firstW) - avg(lastW)) / spanDays;
+  return Math.round(avg(cals) + lossPerDay*KCAL_PER_KG);
+}
+function renderOnTrack(){
+  const t = today();
+  const s7 = new Date(t); s7.setDate(t.getDate()-6);
+  const s14 = new Date(t); s14.setDate(t.getDate()-13);
+  const cur7 = rangeAvg(s7,7), prev7 = rangeAvg(s14,7);
+  const tdee = Number(state.tdee) || DEFAULT_TDEE;
+  const box = $("onTrack"); box.innerHTML = "";
+  const v = document.createElement("div"); v.className = "verdict";
+  const head = document.createElement("b"), note = document.createElement("p");
+  v.append(head, note);
+  const g = document.createElement("div"); g.className = "vgrid";
+  const tile = (val, lbl) => { const d=document.createElement("div"); const b=document.createElement("b"); b.textContent=val; const sp=document.createElement("span"); sp.textContent=lbl; d.append(b,sp); g.appendChild(d); };
+  const calOK = cur7.cal && cur7.cal.n >= 4;
+  const wOK = cur7.w && prev7.w && cur7.w.n >= 2 && prev7.w.n >= 2;
+  const expected = calOK ? (tdee - cur7.cal.v)*7/KCAL_PER_KG : null;   // kg lost per week
+  const actual = wOK ? prev7.w.v - cur7.w.v : null;                     // kg lost (positive = lost)
+  tile(calOK ? Math.round(cur7.cal.v).toLocaleString() : "—", "Avg calories, " + (cur7.cal ? cur7.cal.n : 0) + " days logged");
+  tile(calOK ? (Math.round(tdee - cur7.cal.v)).toLocaleString() : "—", "Daily deficit vs " + tdee.toLocaleString());
+  tile(expected!=null ? (expected>=0?"−":"+") + Math.abs(expected).toFixed(2) + " kg" : "—", "Calories say you should lose");
+  tile(actual!=null ? (actual>=0?"−":"+") + Math.abs(actual).toFixed(2) + " kg" : "—", "Scale says (avg vs last week)");
+  let cls = "", h = "", n = "";
+  if (!calOK && !wOK){ h = "Not enough data yet"; n = "Log food on at least 4 days and weigh in at least twice this week and last week."; }
+  else if (!wOK){
+    h = expected >= 0.5 && expected <= 1.1 ? "Calories look on track" : expected < 0.5 ? "Deficit looks small" : "Deficit looks big";
+    cls = expected >= 0.5 && expected <= 1.1 ? "good" : "warn";
+    n = "Your calories point to about " + expected.toFixed(2) + " kg a week. Weigh in a few mornings this week and last to check it against the scale.";
+  } else if (!calOK){
+    h = actual >= 0.5 && actual <= 1 ? "Scale is on track" : actual > 1 ? "Losing fast" : "Scale is slow"; cls = actual >= 0.5 && actual <= 1 ? "good" : "warn";
+    n = "Weight moved " + actual.toFixed(2) + " kg. Log food on more days to see whether calories match.";
+  } else {
+    const gap = actual - expected;
+    if (actual > 1.2){ cls="warn"; h = "Losing faster than planned"; n = "Over 1 kg a week can cost muscle. Fine for week one (water), but if it repeats, add 100–150 cal."; }
+    else if (actual >= 0.5){ cls="good"; h = "On track"; n = "Scale and calories agree. Keep doing what you're doing."; }
+    else if (expected >= 0.5 && gap < -0.4){ cls="warn"; h = "Scale is behind your calories"; n = "Usually water, salt or under-logged food (sauces, oils, snacks). Give it another week before changing anything. Stuck 2 weeks? Drop ~150 cal or add steps."; }
+    else if (expected < 0.5){ cls="bad"; h = "Not enough of a deficit"; n = "Your calories only support about " + Math.max(0,expected).toFixed(2) + " kg a week. Tighten up to 1,900–2,000 or add steps."; }
+    else { cls="warn"; h = "A bit slow"; n = "Lost " + actual.toFixed(2) + " kg. Normal week-to-week noise. Stay consistent and check again next week."; }
+  }
+  v.className = "verdict " + cls; head.textContent = h; note.textContent = n;
+  box.append(v, g);
+  $("tdeeIn").value = tdee;
+  const learned = learnedTDEE();
+  $("tdeeNote").textContent = learned
+    ? "From your last 4 weeks of logging, your real maintenance looks like about " + learned.toLocaleString() + " cal. Tap it into the box if it seems right."
+    : "Starting guess for your size and activity. After 3–4 weeks of logging food and weight, the tracker will suggest a better number.";
+}
+function renderTrends(){
+  const t = today(), mon = new Date(t); mon.setDate(t.getDate() - ((t.getDay()+6)%7));
+  const weeks = [];
+  for (let i=7;i>=0;i--){ const s=new Date(mon); s.setDate(mon.getDate()-7*i); weeks.push({s, r: rangeAvg(s,7)}); }
+  const metrics = [
+    {k:"cal", name:"Calories", target:1950, fmt:v=>Math.round(v).toLocaleString(), band:[1900,2000]},
+    {k:"pro", name:"Protein (g)", target:150, fmt:v=>Math.round(v)},
+    {k:"steps", name:"Steps", target:8000, fmt:v=>Math.round(v/100)/10+"k"}
+  ];
+  const box = $("trends"); box.innerHTML = "";
+  metrics.forEach(m => {
+    const vals = weeks.map(w => w.r[m.k] ? w.r[m.k].v : null);
+    const card = document.createElement("div"); card.className = "trend";
+    const last = vals[vals.length-1], prev = vals[vals.length-2];
+    let sub = "This week: " + (last!=null ? m.fmt(last) : "—");
+    if (last!=null && prev!=null){ const d = last-prev; sub += " (" + (d>=0?"+":"−") + m.fmt(Math.abs(d)) + " vs last)"; }
+    card.innerHTML = '<div class="th"><span></span><small></small></div>';
+    card.querySelector("span").textContent = m.name; card.querySelector("small").textContent = sub;
+    const W=320,H=110,P=22,B=16;
+    const have = vals.filter(v=>v!=null);
+    if (!have.length){ const e=document.createElement("div"); e.className="empty"; e.textContent="Nothing logged yet."; card.appendChild(e); box.appendChild(card); return; }
+    const mx = Math.max(m.target*1.15, ...have);
+    const bw = (W-2*P)/8;
+    const y = v => H-B - v/mx*(H-B-8);
+    let svg = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+m.name+' weekly averages">';
+    svg += '<line x1="'+P+'" x2="'+(W-P)+'" y1="'+(H-B)+'" y2="'+(H-B)+'" stroke="var(--line)"/>';
+    vals.forEach((v,i) => {
+      const x = P + i*bw + 4;
+      if (v!=null){
+        let hit;
+        if (m.band) hit = v>=m.band[0] && v<=m.band[1]+50; else hit = v>=m.target;
+        const over = m.k==="cal" && v>m.band[1]+100;
+        svg += '<rect x="'+x.toFixed(1)+'" y="'+y(v).toFixed(1)+'" width="'+(bw-8).toFixed(1)+'" height="'+(H-B-y(v)).toFixed(1)+'" rx="3" fill="'+(over?"var(--danger)":hit?"var(--kit)":"var(--pitch2)")+'"><title>'+m.fmt(v)+'</title></rect>';
+      }
+      const lbl = weeks[i].s.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+      if (i%2===1 || i===7) svg += '<text x="'+(x+(bw-8)/2).toFixed(1)+'" y="'+(H-3)+'" font-size="10" text-anchor="middle" fill="var(--muted)">'+(i===7?"This wk":lbl)+'</text>';
+    });
+    svg += '<line x1="'+P+'" x2="'+(W-P)+'" y1="'+y(m.target).toFixed(1)+'" y2="'+y(m.target).toFixed(1)+'" stroke="var(--muted)" stroke-dasharray="4 3"/>';
+    svg += '<text x="'+(W-P)+'" y="'+(y(m.target)-3).toFixed(1)+'" font-size="10" text-anchor="end" fill="var(--muted)">'+m.fmt(m.target)+'</text>';
+    svg += '</svg>';
+    card.insertAdjacentHTML("beforeend", svg);
+    box.appendChild(card);
   });
 }
 
@@ -527,17 +904,21 @@ function renderChart(){
     '</svg>';
 }
 
-function renderAll(){ renderHeader(); renderChecklist(); renderFood(); renderWeek(); }
+function renderAll(){ renderHeader(); renderChecklist(); renderFood(); renderWeek(); renderGoals(); }
 
 function showTab(name){
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===name));
-  ["today","food","week","plan"].forEach(t => $("tab-"+t).hidden = t!==name);
+  ["today","food","week","goals","plan"].forEach(t => $("tab-"+t).hidden = t!==name);
   if (name==="week") renderWeek();
   window.scrollTo(0,0);
 }
 
 // events
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
+document.querySelectorAll(".subtabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".subtabs button").forEach(x => x.setAttribute("aria-pressed", x===b));
+  ["list","time","fit"].forEach(v => $("gv-"+v).hidden = v !== b.dataset.gv);
+});
 $("prev").onclick = () => { cur.setDate(cur.getDate()-1); renderAll(); };
 $("next").onclick = () => { if (key(cur)!==key(today())) { cur.setDate(cur.getDate()+1); renderAll(); } };
 ["wake","bedtime"].forEach(f => $(f).addEventListener("change", e => { const k=key(cur), dd=day(k); const v=e.target.value; if(!v) delete dd[f]; else dd[f]=v; autoTicks(k); save(); renderChecklist(); renderHeader(); }));
@@ -548,6 +929,7 @@ $("cAdd").onclick = () => {
   if ($("cSave").checked) { state.foods = state.foods || []; if (!state.foods.some(f=>f.n===n) && !FOODS.some(f=>f.n===n)) state.foods.push({n,c,p}); $("cSave").checked = false; }
   addFood({n,c,p}); $("cName").value=$("cCal").value=$("cPro").value="";
 };
+$("tdeeIn").addEventListener("change", e => { const v = parseInt(e.target.value); if (v>=1400 && v<=4500){ state.tdee = v; } else { state.tdee = null; } save(); renderWeek(); });
 $("waistAdd").onclick = () => {
   const v = parseFloat($("waist").value); if (!v) { $("waist").focus(); return; }
   state.waist.push({v, d: today().toLocaleDateString(undefined,{month:"short",day:"numeric"})}); $("waist").value=""; renderWeek(); save();
@@ -572,7 +954,7 @@ $("importFile").onchange = async e => {
     const data = JSON.parse(await f.text());
     if (!data || typeof data.days !== "object") throw new Error("bad");
     if (!confirm("Replace what's on this phone with this backup?")) return;
-    state = Object.assign({days:{},waist:[]}, data); saveLocal(); renderAll(); $("backupNote").textContent = "Backup restored.";
+    state = Object.assign({days:{},waist:[],ms:{},tdee:null}, data); saveLocal(); renderAll(); $("backupNote").textContent = "Backup restored.";
   } catch(err) { $("backupNote").textContent = "That file isn't a tracker backup. Pick a file named tracker-backup-….json."; }
   e.target.value = "";
 };
