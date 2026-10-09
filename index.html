@@ -225,6 +225,21 @@ details.goal .item{border-top:1px solid var(--line)}
 .bday{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
 .bday input{width:46px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 4px;background:var(--bg);position:static;opacity:1;pointer-events:auto;min-height:36px}
 .item.late .txt small{color:var(--danger)}
+.ecard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.ecard label{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+.ecard input,.ecard textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);min-height:40px;font:inherit;color:inherit}
+.ecard textarea{min-height:64px;resize:vertical}
+.erow{display:grid;grid-template-columns:1fr 130px auto;gap:6px;align-items:center;margin-top:6px}
+.etools{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.etools button,.erow button{background:var(--bg);border:1px solid var(--line);border-radius:8px;min-width:40px;min-height:40px;padding:0 10px;cursor:pointer;font-size:14px;color:var(--ink)}
+.etools button.del{color:var(--danger)}
+.addbtn{width:100%;background:none;border:2px dashed var(--line);border-radius:12px;padding:12px;cursor:pointer;color:var(--muted);font-weight:600;margin:4px 0 10px;min-height:48px}
+.tdwhen{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 2px 0;font-size:13px;color:var(--muted)}
+.tdwhen button{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 12px;min-height:36px;cursor:pointer;font-size:13px}
+.tdwhen button[aria-pressed="true"]{background:var(--pitch);color:#F3F5EF;border-color:var(--pitch)}
+.tdwhen input{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--card);min-height:36px}
+#todoList .item .x{flex:none}
+#todoList:empty{display:none}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -246,6 +261,17 @@ details.goal .item{border-top:1px solid var(--line)}
 
   <!-- TODAY -->
   <section id="tab-today">
+    <h2 id="todoTitle">To do</h2>
+    <div class="group" id="todoList"></div>
+    <div class="mform" style="grid-template-columns:1fr auto;margin-top:8px">
+      <input id="tdText" placeholder="Add a task" aria-label="New task" enterkeyhint="done">
+      <button class="btn" id="tdAdd">Add</button>
+    </div>
+    <div class="tdwhen" role="group" aria-label="When">
+      <button data-w="0" aria-pressed="true">Today</button>
+      <button data-w="1" aria-pressed="false">Tomorrow</button>
+      <label>or <input type="date" id="tdDate" aria-label="Pick a date"></label>
+    </div>
     <div id="checklist"></div>
     <h2>Numbers</h2>
     <div class="nums">
@@ -313,6 +339,8 @@ details.goal .item{border-top:1px solid var(--line)}
   <section id="tab-goals" hidden>
     <div class="focuscard"><small>Main focus right now</small><b id="focusTitle"></b><small id="focusNote"></small></div>
     <p class="nextup" id="nextUp"></p>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn" id="gEditBtn" style="padding:8px 14px">Edit plan</button></div>
+    <div id="gFocusEdit"></div>
     <div class="subtabs" role="group" aria-label="Goals view">
       <button data-gv="list" aria-pressed="true">Goals</button>
       <button data-gv="time" aria-pressed="false">Timeline</button>
@@ -323,11 +351,13 @@ details.goal .item{border-top:1px solid var(--line)}
       <div class="prog"><div class="bar"><i id="allBar" style="width:0"></i></div><em id="allPct">0%</em></div>
       <p class="muted" style="margin:2px 2px 0">Tap a goal to see its steps. Dates are targets, not hard deadlines.</p>
       <div id="goalList"></div>
+      <div id="gEditTools"></div>
     </div>
     <div id="gv-time" hidden>
       <h2>Timeline</h2>
       <p class="muted" style="margin:0 2px 12px">One main thing at a time. The yellow phase is where you are now.</p>
       <div id="phaseList"></div>
+      <div id="pEditTools"></div>
     </div>
     <div id="gv-fit" hidden>
       <h2>Where it goes in your day</h2>
@@ -592,29 +622,42 @@ function items(dateObj){
   return list;
 }
 
-const GOALS = [
- {area:"School and money", id:"gpa", title:"4.3 GPA year", when:"Sep 2027 – Apr 2028", why:"Fall 2027 + Winter 2028. Gets at least $7,000 in scholarships and opens every other door.", ms:[
+const DEFAULT_PLAN = {v:2,
+ goals:[
+ {area:"School and money", id:"gpa", title:"4.3 GPA year", when:"Sep 2027 – Apr 2028", why:"Fall 2027 + Winter 2028. At least $7,000 in UNB scholarships, and it opens every other door.", ms:[
   ["gpa1","Set up a study system before term starts","2027-09-08"],
   ["gpa0","Meet an advisor about the math minor and DTME","2027-09-30"],
   ["gpa2","Every Fall assignment handed in on time","2027-12-20"],
   ["gpa3","Fall term: 4.3","2027-12-31"],
   ["gpa4","Submit scholarship application (Jan 1 – Apr 15)","2028-04-15"],
   ["gpa5","Winter term: 4.3","2028-04-30"]]},
- {area:"School and money", id:"money", title:"Pay for school", when:"Ongoing", why:"Fall tuition is about $14k a semester.", ms:[
-  ["mon1","Set up a weekly VFV contribution in your TFSA","2026-11-01"],
+ {area:"School and money", id:"debt", title:"Debt-free", when:"By Dec 2026", why:"RBC $3,500 (over its $2,500 limit), Scotia $1,000, friends $1,500. Money tab tracks each payment.", ms:[
+  ["db1","RBC back under its limit","2026-10-22"],
+  ["db2","Pay UNB fees ($750)","2026-10-29"],
+  ["db3","RBC paid off","2026-11-30"],
+  ["db4","Scotia paid off","2026-12-15"],
+  ["db5","Friends paid back","2026-12-31"]]},
+ {area:"School and money", id:"money", title:"Pay for school", when:"Ongoing", why:"Fall tuition about $14k, winter about $12k. Co-op savings, a TFSA, and part-time work during school.", ms:[
+  ["mon4","Switch Spotify to student, cut the extra Uber One","2026-10-31"],
+  ["mon1","Open a TFSA and start investing (VFV or QQC)","2027-01-31"],
+  ["mon5","Emergency fund at $1,000","2027-02-28"],
   ["mon2","Plan Fall 2027 tuition from co-op savings","2027-08-31"],
-  ["mon3","Find a chill part-time job, max 10 h/week (RA role ideal)","2027-09-30"]]},
- {area:"Career", id:"coop", title:"Summer 2027 co-op, new company", when:"Apply Jan – Mar", why:"Aerospace, clean energy, EV or advanced manufacturing. Toronto or Montreal.", ms:[
-  ["co1","Resume and cover letter updated with IFS work","2026-12-15"],
-  ["co2","15 applications sent","2027-01-31"],
-  ["co3","40+ applications sent","2027-03-15"],
-  ["co4","Offer accepted","2027-04-15"]]},
- {area:"Career", id:"ifs", title:"Finish strong at IFS", when:"Now – Apr 2027", why:"A great reference from Jennifer helps every application after this.", ms:[
+  ["mon6","Take about $5k from the TFSA for fall tuition","2027-09-01"],
+  ["mon3","Part-time engineering work during school (IFS, Paragon, Irving Oil)","2027-09-30"]]},
+ {area:"Career", id:"ifs", title:"IFS: Fall + Winter 2027", when:"Now – Apr 2027", why:"Extension granted for Winter 2027. A great reference from Jennifer helps every application after this.", ms:[
+  ["ifs4","Get the formal Winter offer letter from Victoria","2026-10-31"],
+  ["ifs5","Find Saint John housing for Jan (co-op apartment ends Jan 1)","2026-12-01"],
   ["ifs1","Give a short update in a team meeting","2027-03-31"],
   ["ifs2","Ask Jennifer for a reference","2027-04-15"],
   ["ifs3","End-of-term presentation of your work","2027-04-30"]]},
+ {area:"Career", id:"coop", title:"Summer 2027 co-op, new company", when:"Apply Jan – Mar", why:"Good pay that makes sense financially. Ford (family friend), Irving Oil, aerospace or energy. Toronto is fine.", ms:[
+  ["co1","Resume and cover letter updated with IFS work","2026-12-15"],
+  ["co5","Reach out to the Ford contact through the family friend","2026-12-31"],
+  ["co2","15 applications sent","2027-01-31"],
+  ["co3","40+ applications sent","2027-03-15"],
+  ["co4","Offer accepted","2027-04-15"]]},
  {area:"Certifications", id:"cswa", title:"Official SolidWorks CSWA", when:"By Dec 2026", why:"Your current certificate isn't the official Dassault one. Employers look for CSWA.", ms:[
-  ["sw1","Install SolidWorks (student license)","2026-10-20"],
+  ["sw1","Install SolidWorks (student licence)","2026-10-20"],
   ["sw2","Work through the official sample exam","2026-11-01"],
   ["sw3","Two timed practice exams","2026-11-25"],
   ["sw4","Pass the CSWA","2026-12-12"],
@@ -649,94 +692,170 @@ const GOALS = [
   ["pr3","Record a 3-minute talk and rewatch it","2027-02-28"],
   ["pr4","Present the pendulum at a UNB showcase","2028-03-31"]]},
  {area:"Fitness", id:"fit", title:"Cut fat, keep building muscle", when:"Ongoing", why:"Lean, athletic soccer-player-who-lifts look. Daily tracking lives in Today, Food and Week.", ms:[
-  ["fi1","Take starting progress photos","2026-10-15"],
+  ["fi1","Take starting progress photos (then every 2 weeks)","2026-10-15"],
   ["fi2","Join the Saint John football group","2026-10-31"],
   ["fi3","Beat bench 70 kg × 7","2026-11-30"],
   ["fi4","4 gym days a week for 8 weeks straight","2026-12-01"],
   ["fi5","First 5 kg down from 84 kg","2027-01-15"],
   ["fi6","Compare progress photos","2027-01-15"]]},
- {area:"Life", id:"drive", title:"NB licence and first car", when:"Nov 2026 – Aug 2027", why:"Cheapest route to a licence, then a used car ($5–7k) that lasts 3+ years.", ms:[
+ {area:"Life", id:"drive", title:"NB licence and first car", when:"Nov 2026 – Feb 2027", why:"Cheapest route to a licence, then an older Camry (2006–2009, about $2,500–3,000) once debt is gone.", ms:[
   ["dr1","Ask Service NB if your Dubai licence history counts","2026-11-15"],
-  ["dr2","Pass the knowledge test","2027-01-31"],
-  ["dr3","Pass the road test","2027-05-31"],
-  ["dr4","Buy the car (wait if summer co-op is in Toronto)","2027-08-31"]]}
-];
-const PHASES = [
- {from:"2026-10-01",to:"2026-12-31",t:"IFS Fall term",s:"Oct – Dec 2026",i:["CSWA, exam by early Dec","Message Ahmed","MATLAB/Simulink Onramps on lunch breaks","Write your own emails, start a phrase bank","Football group, steady gym routine","Licence: check with Service NB","Resume ready by Dec 15"]},
- {from:"2027-01-01",to:"2027-04-30",t:"IFS Winter term",s:"Jan – Apr 2027",i:["Summer co-op applications come first","Ansys Associate by end of Feb","Pendulum simulation (Mar – Apr)","Email professors in April","Present at work, ask Jennifer for a reference","Licence knowledge test"]},
- {from:"2027-05-01",to:"2027-08-31",t:"Summer co-op",s:"May – Aug 2027",i:["Build the single pendulum (SolidWorks + Ansys)","Lock in a research supervisor","Road test, car if it makes sense","Save for Fall tuition, line up a part-time job","Optional: CSWP"]},
- {from:"2027-09-01",to:"2028-04-30",t:"Study terms",s:"Sep 2027 – Apr 2028",i:["4.3 GPA comes first","Pendulum research, ~3 h/week, pause in exams","Double pendulum after Auto Controls","Scholarship application by Apr 15","Conference abstract"]},
+  ["dr2","Pass the knowledge test","2026-12-15"],
+  ["dr4","Buy the Camry (after debt-free)","2027-01-31"],
+  ["dr3","Pass the road test","2027-02-28"]]}
+ ],
+ phases:[
+ {from:"2026-10-01",to:"2026-12-31",t:"IFS Fall term",s:"Oct – Dec 2026",i:["Debt-free by December (Money tab)","UNB fees $750 by Oct 29","CSWA, exam by early Dec","Winter offer letter + Saint John housing for Jan","Message Ahmed","Write your own emails, start a phrase bank","Football group, steady gym routine","Licence: Service NB, knowledge test","Resume ready by Dec 15"]},
+ {from:"2027-01-01",to:"2027-04-30",t:"IFS Winter term",s:"Jan – Apr 2027",i:["Summer co-op applications first (Ford contact, Irving Oil, others)","Open TFSA, start investing","Buy the Camry, road test","Ansys Associate by end of Feb","Pendulum simulation (Mar – Apr)","Email professors in April","Ask Jennifer for a reference"]},
+ {from:"2027-05-01",to:"2027-08-31",t:"Summer co-op",s:"May – Aug 2027",i:["Build the single pendulum (SolidWorks + Ansys)","Lock in a research supervisor","Save for Fall tuition (about $14k)","Line up part-time engineering work for school","Optional: CSWP"]},
+ {from:"2027-09-01",to:"2028-04-30",t:"Study terms",s:"Sep 2027 – Apr 2028",i:["4.3 GPA comes first","Take about $5k from the TFSA for tuition","Part-time work, max 10 h/week","Pendulum research, ~3 h/week, pause in exams","Scholarship application by Apr 15","Conference abstract"]},
  {from:"2028-05-01",to:"2028-12-31",t:"After",s:"2028",i:["Present at the conference","2028 co-op search with a stronger profile"]}
-];
-const FOCUS = [
- {to:"2026-12-15",t:"SolidWorks CSWA",n:"Exam by early December. Lunch slots: MATLAB Onramp."},
+ ],
+ focus:[
+ {to:"2026-12-15",t:"Debt + SolidWorks CSWA",n:"Payday checklist first. CSWA exam by early December."},
  {to:"2027-02-28",t:"Ansys + co-op applications",n:"Applications come first in Jan – Mar."},
  {to:"2027-04-30",t:"Pendulum simulation + applications",n:"Also email professors in April."},
  {to:"2027-08-31",t:"Build the single pendulum",n:"During your summer co-op, weekends only."},
  {to:"2028-04-30",t:"4.3 GPA",n:"Pendulum research about 3 h/week. Pause in exams."},
  {to:"2099-01-01",t:"Conference + 2028 co-op",n:"Present your work."}
-];
+ ]};
+const clone = o => JSON.parse(JSON.stringify(o));
+function plan(){ if (!state.plan || !Array.isArray(state.plan.goals)) state.plan = clone(DEFAULT_PLAN); return state.plan; }
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const todayKey = () => { const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); };
-function currentFocus(){ const k = todayKey(); return FOCUS.find(f => k <= f.to); }
-const fmtD = s => new Date(s+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+function currentFocus(){ const k = todayKey(); const f = plan().focus.slice().sort((a,b)=>(a.to||"9").localeCompare(b.to||"9")).find(f => k <= (f.to||"9999")); return f || {t:"Set your main focus", n:"Tap Edit plan to add one."}; }
+const fmtD = s => s ? new Date(s+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "No date";
 const openGoals = new Set();
+let gEdit = false;
+function el2(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text!=null) e.textContent = text; return e; }
+function field(parent, label, value, onSet, type){
+  const l = el2("label", null, label); const i = el2(type==="area" ? "textarea" : "input"); if (type && type!=="area") i.type = type;
+  i.value = value || ""; i.addEventListener("change", () => { onSet(i.value); save(); renderGoals(); renderChecklist(); });
+  l.appendChild(i); parent.appendChild(l); return i;
+}
+function moveIn(arr, i, d){ const j = i + d; if (j < 0 || j >= arr.length) return; const x = arr[i]; arr[i] = arr[j]; arr[j] = x; save(); renderGoals(); }
+function tools(parent, arr, i, delMsg){
+  const t = el2("div","etools");
+  const up = el2("button",null,"↑"); up.setAttribute("aria-label","Move up"); up.onclick = () => moveIn(arr, i, -1);
+  const dn = el2("button",null,"↓"); dn.setAttribute("aria-label","Move down"); dn.onclick = () => moveIn(arr, i, 1);
+  const del = el2("button","del","Delete"); del.onclick = () => { if (confirm(delMsg)) { arr.splice(i,1); save(); renderGoals(); renderChecklist(); } };
+  t.append(up, dn, del); parent.appendChild(t);
+}
 function renderGoals(){
-  const tk = todayKey(), f = currentFocus();
-  $("focusTitle").textContent = f.t; $("focusNote").textContent = f.n;
+  const P = plan(), tk = todayKey(), f = currentFocus();
+  $("focusTitle").textContent = f.t; $("focusNote").textContent = f.n || "";
+  $("gEditBtn").textContent = gEdit ? "Done editing" : "Edit plan";
   const pending = [];
-  GOALS.forEach(g => g.ms.forEach(m => { if (!state.ms[m[0]]) pending.push(m); }));
-  pending.sort((a,b) => a[2].localeCompare(b[2]));
+  P.goals.forEach(g => g.ms.forEach(m => { if (!state.ms[m[0]]) pending.push(m); }));
+  pending.sort((a,b) => (a[2]||"9").localeCompare(b[2]||"9"));
   const nu = $("nextUp"); nu.textContent = "";
-  if (pending.length){
+  if (pending.length && pending[0][2]){
     const p = pending[0], days = Math.round((new Date(p[2]+"T12:00:00") - new Date(tk+"T12:00:00"))/86400000);
     const st = document.createElement("strong"); st.textContent = p[1];
     nu.append("Next up: ", st, " (" + (days<0 ? Math.abs(days)+" days overdue" : days===0 ? "today" : "in "+days+" days") + ")");
-  } else nu.textContent = "Every step is done.";
+  } else nu.textContent = pending.length ? "" : "Every step is done.";
+
+  // main focus editor
+  const fe = $("gFocusEdit"); fe.innerHTML = "";
+  if (gEdit){
+    fe.appendChild(el2("h2",null,"Main focus"));
+    fe.appendChild(el2("p","muted","Shows at the top and in your daily Growth items. Each one lasts until its end date."));
+    P.focus.forEach((x,i) => {
+      const c = el2("div","ecard");
+      field(c, "Focus", x.t, v => x.t = v);
+      field(c, "Note", x.n, v => x.n = v);
+      field(c, "Until", x.to, v => x.to = v || "2099-01-01", "date");
+      tools(c, P.focus, i, "Delete this focus period?");
+      fe.appendChild(c);
+    });
+    const af = el2("button","addbtn","+ Add focus period");
+    af.onclick = () => { P.focus.push({to: todayKey(), t:"New focus", n:""}); save(); renderGoals(); };
+    fe.appendChild(af);
+  }
+
+  // goals
   const box = $("goalList"); box.innerHTML = "";
-  let all=0, done=0, lastA="";
-  GOALS.forEach(g => {
-    if (g.area !== lastA){ const a=document.createElement("div"); a.className="area"; a.textContent=g.area; box.appendChild(a); lastA=g.area; }
+  let all=0, done=0, lastA=null;
+  P.goals.forEach((g, gi) => {
     const gd = g.ms.filter(m => state.ms[m[0]]).length; all += g.ms.length; done += gd;
+    if (g.area !== lastA){ box.appendChild(el2("div","area", g.area || "Other")); lastA = g.area; }
+    if (gEdit){
+      const c = el2("div","ecard");
+      field(c, "Goal", g.title, v => g.title = v);
+      field(c, "When", g.when, v => g.when = v);
+      field(c, "Why it matters", g.why, v => g.why = v, "area");
+      field(c, "Group", g.area, v => g.area = v);
+      c.appendChild(el2("label",null,"Steps (text, target date)"));
+      g.ms.forEach((m, mi) => {
+        const r = el2("div","erow");
+        const ti = el2("input"); ti.value = m[1]; ti.setAttribute("aria-label","Step"); ti.addEventListener("change", () => { m[1] = ti.value; save(); renderGoals(); });
+        const di = el2("input"); di.type = "date"; di.value = m[2] || ""; di.setAttribute("aria-label","Target date"); di.addEventListener("change", () => { m[2] = di.value; save(); renderGoals(); });
+        const x = el2("button",null,"✕"); x.setAttribute("aria-label","Delete step"); x.onclick = () => { if (confirm("Delete this step?")) { g.ms.splice(mi,1); save(); renderGoals(); } };
+        r.append(ti, di, x); c.appendChild(r);
+        const mv = el2("div","etools"); mv.style.marginTop = "2px";
+        const up = el2("button",null,"↑"); up.setAttribute("aria-label","Move step up"); up.onclick = () => moveIn(g.ms, mi, -1);
+        const dn = el2("button",null,"↓"); dn.setAttribute("aria-label","Move step down"); dn.onclick = () => moveIn(g.ms, mi, 1);
+        mv.append(up, dn); c.appendChild(mv);
+      });
+      const as = el2("button","addbtn","+ Add step"); as.onclick = () => { g.ms.push([newId("s"), "New step", ""]); save(); renderGoals(); };
+      c.appendChild(as);
+      c.appendChild(el2("label",null,"Move or delete this goal"));
+      tools(c, P.goals, gi, "Delete the goal \"" + g.title + "\" and its steps?");
+      box.appendChild(c);
+      return;
+    }
     const det = document.createElement("details"); det.className="goal"; det.open = openGoals.has(g.id);
     det.addEventListener("toggle", () => { det.open ? openGoals.add(g.id) : openGoals.delete(g.id); });
     const sum = document.createElement("summary");
-    const top = document.createElement("div"); top.className="gtop";
-    const tt = document.createElement("span"); tt.textContent = g.title;
-    const wh = document.createElement("small"); wh.textContent = g.when;
-    top.append(tt, wh);
-    const why = document.createElement("div"); why.className="gwhy"; why.textContent = g.why;
-    const pr = document.createElement("div"); pr.className="prog";
-    pr.innerHTML = '<div class="bar"><i></i></div><em></em>';
-    pr.querySelector("i").style.width = Math.round(gd/g.ms.length*100)+"%";
-    if (gd===g.ms.length) pr.querySelector("i").className = "hit";
+    const top = el2("div","gtop"); top.append(el2("span",null,g.title), el2("small",null,g.when||""));
+    const why = el2("div","gwhy", g.why||"");
+    const pr = el2("div","prog"); pr.innerHTML = '<div class="bar"><i></i></div><em></em>';
+    pr.querySelector("i").style.width = (g.ms.length ? Math.round(gd/g.ms.length*100) : 0)+"%";
+    if (g.ms.length && gd===g.ms.length) pr.querySelector("i").className = "hit";
     pr.querySelector("em").textContent = gd+"/"+g.ms.length;
     sum.append(top, why, pr); det.appendChild(sum);
     g.ms.forEach(([id,label,due]) => {
       const lab = document.createElement("label");
-      lab.className = "item" + (state.ms[id] ? " done" : "") + (!state.ms[id] && due < tk ? " late" : "");
+      lab.className = "item" + (state.ms[id] ? " done" : "") + (!state.ms[id] && due && due < tk ? " late" : "");
       const cb = document.createElement("input"); cb.type="checkbox"; cb.checked = !!state.ms[id];
-      const bx = document.createElement("span"); bx.className="box";
-      const txt = document.createElement("span"); txt.className="txt";
-      const t = document.createElement("span"); t.textContent = label;
-      const s = document.createElement("small"); s.textContent = "Target: " + fmtD(due);
-      txt.append(t, s);
+      const bx = el2("span","box"), txt = el2("span","txt");
+      txt.append(el2("span",null,label), el2("small",null, due ? "Target: " + fmtD(due) : "No target date"));
       cb.addEventListener("change", () => { if (cb.checked) state.ms[id] = true; else delete state.ms[id]; save(); renderGoals(); });
       lab.append(cb, bx, txt); det.appendChild(lab);
     });
     box.appendChild(det);
   });
-  const pct = Math.round(done/all*100);
+  const gt = $("gEditTools"); gt.innerHTML = "";
+  if (gEdit){
+    const ag = el2("button","addbtn","+ Add goal");
+    ag.onclick = () => { const id = newId("g"); P.goals.push({area: P.goals.length ? P.goals[P.goals.length-1].area : "Goals", id, title:"New goal", when:"", why:"", ms:[]}); save(); renderGoals(); };
+    const rs = el2("button","addbtn","Reset whole plan to the original");
+    rs.onclick = () => { if (confirm("Put all goals, timeline and focus back to the original plan? Your ticks stay.")) { state.plan = clone(DEFAULT_PLAN); save(); renderGoals(); renderChecklist(); } };
+    gt.append(ag, rs);
+  }
+  const pct = all ? Math.round(done/all*100) : 0;
   $("allBar").style.width = pct+"%"; $("allPct").textContent = pct+"%";
+
+  // timeline
   const pl = $("phaseList"); pl.innerHTML = "";
-  PHASES.forEach(p => {
-    const d = document.createElement("div");
-    d.className = "phase" + (tk > p.to ? " past" : tk >= p.from ? " now" : "");
-    const h = document.createElement("h3"); h.textContent = p.t;
-    const sm = document.createElement("small"); sm.textContent = p.s; h.appendChild(sm);
-    const ul = document.createElement("ul");
-    p.i.forEach(x => { const li=document.createElement("li"); li.textContent=x; ul.appendChild(li); });
-    d.append(h, ul); pl.appendChild(d);
+  P.phases.forEach((p, pi) => {
+    if (gEdit){
+      const c = el2("div","ecard");
+      field(c, "Phase", p.t, v => p.t = v);
+      field(c, "Dates label", p.s, v => p.s = v);
+      field(c, "Starts", p.from, v => p.from = v, "date");
+      field(c, "Ends", p.to, v => p.to = v, "date");
+      field(c, "What to do (one per line)", (p.i||[]).join("\n"), v => p.i = v.split("\n").map(s=>s.trim()).filter(Boolean), "area");
+      tools(c, P.phases, pi, "Delete the phase \"" + p.t + "\"?");
+      pl.appendChild(c); return;
+    }
+    const d = el2("div", "phase" + (p.to && tk > p.to ? " past" : (p.from && tk >= p.from ? " now" : "")));
+    const hh = el2("h3", null, p.t); hh.appendChild(el2("small", null, p.s||"")); d.appendChild(hh);
+    const ul = document.createElement("ul"); (p.i||[]).forEach(x => ul.appendChild(el2("li", null, x))); d.appendChild(ul);
+    pl.appendChild(d);
   });
+  const pt = $("pEditTools"); pt.innerHTML = "";
+  if (gEdit){ const ap = el2("button","addbtn","+ Add phase"); ap.onclick = () => { P.phases.push({from:"",to:"",t:"New phase",s:"",i:[]}); save(); renderGoals(); }; pt.appendChild(ap); }
 }
 
 let state = {days:{}, waist:[], ms:{}};
@@ -1505,6 +1624,11 @@ $("sAdd").onclick = () => {
   const dd = day(key(today())); dd.checks.spendlog = true;
   save(); renderMoney(); renderChecklist(); renderHeader();
 };
+$("tdAdd").onclick = addTodo;
+$("tdText").addEventListener("keydown", e => { if (e.key === "Enter") addTodo(); });
+document.querySelectorAll(".tdwhen button").forEach(b => b.onclick = () => { tdWhen = +b.dataset.w; $("tdDate").value = ""; document.querySelectorAll(".tdwhen button").forEach(x => x.setAttribute("aria-pressed", x===b)); });
+$("tdDate").addEventListener("change", () => { if ($("tdDate").value) document.querySelectorAll(".tdwhen button").forEach(x => x.setAttribute("aria-pressed","false")); });
+$("gEditBtn").onclick = () => { gEdit = !gEdit; renderGoals(); window.scrollTo(0, $("tab-goals").offsetTop); };
 $("bPrev").onclick = () => { bOff--; renderBills(); };
 $("bNext").onclick = () => { bOff++; renderBills(); };
 $("oAdd").onclick = () => {
@@ -1513,7 +1637,44 @@ $("oAdd").onclick = () => {
   $("oName").value = $("oAmt").value = $("oDue").value = ""; $("oInc").checked = false; save(); renderMoney();
 };
 
-function renderAll(){ renderHeader(); renderChecklist(); renderFood(); renderWeek(); renderGoals(); renderMoney(); }
+let tdWhen = 0;
+function renderTodos(){
+  if (!state.todos) state.todos = [];
+  const k = key(cur), tk = key(today());
+  const list = state.todos.filter(x => (!x.done && x.date <= k) || (x.done && x.doneDate === k));
+  list.sort((a,b) => (a.done - b.done) || a.date.localeCompare(b.date));
+  const open = list.filter(x => !x.done).length;
+  $("todoTitle").textContent = "To do" + (list.length ? " · " + (list.length - open) + "/" + list.length + " done" : "");
+  const box = $("todoList"); box.innerHTML = "";
+  list.forEach(x => {
+    const lab = document.createElement("label"); lab.className = "item" + (x.done ? " done" : "") + (!x.done && x.date < k ? " late" : "");
+    const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!x.done;
+    const bx = document.createElement("span"); bx.className = "box";
+    const txt = document.createElement("span"); txt.className = "txt";
+    const t = document.createElement("span"); t.textContent = x.text; txt.appendChild(t);
+    if (!x.done && x.date < k){ const s = document.createElement("small"); s.textContent = "Carried over from " + new Date(x.date+"T12:00:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); txt.appendChild(s); }
+    cb.addEventListener("change", () => { x.done = cb.checked; x.doneDate = cb.checked ? k : null; save(); renderTodos(); });
+    const del = document.createElement("button"); del.className = "x"; del.textContent = "×"; del.setAttribute("aria-label","Delete task " + x.text);
+    del.onclick = e => { e.preventDefault(); state.todos.splice(state.todos.indexOf(x),1); save(); renderTodos(); };
+    lab.append(cb, bx, txt, del); box.appendChild(lab);
+  });
+  const up = state.todos.filter(x => !x.done && x.date > k).length;
+  if (!list.length){ const e = document.createElement("div"); e.className = "empty"; e.style.padding = "4px 2px"; e.textContent = "Nothing on the list" + (up ? " today. " + up + " task" + (up>1?"s":"") + " coming up later." : ". Add one below."); box.appendChild(e); }
+  else if (up){ const e = document.createElement("div"); e.className = "empty"; e.style.padding = "8px 14px"; e.textContent = up + " more coming up later"; box.appendChild(e); }
+  // trim old finished tasks
+  if (state.todos.length > 400){ const old = state.todos.filter(x => x.done).sort((a,b)=>(a.doneDate||"").localeCompare(b.doneDate||"")); while (state.todos.length > 400 && old.length) state.todos.splice(state.todos.indexOf(old.shift()),1); }
+}
+function addTodo(){
+  const text = $("tdText").value.trim(); if (!text){ $("tdText").focus(); return; }
+  if (!state.todos) state.todos = [];
+  let date = $("tdDate").value;
+  if (!date){ const d = new Date(cur); d.setDate(d.getDate() + tdWhen); date = key(d); }
+  state.todos.push({id: Date.now().toString(36), text, date, done:false, doneDate:null});
+  $("tdText").value = ""; $("tdDate").value = ""; tdWhen = 0;
+  document.querySelectorAll(".tdwhen button").forEach(b => b.setAttribute("aria-pressed", b.dataset.w==="0"));
+  save(); renderTodos();
+}
+function renderAll(){ renderHeader(); renderTodos(); renderChecklist(); renderFood(); renderWeek(); renderGoals(); renderMoney(); }
 
 function showTab(name){
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===name));
