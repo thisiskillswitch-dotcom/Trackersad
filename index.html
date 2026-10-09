@@ -222,6 +222,9 @@ details.goal .item{border-top:1px solid var(--line)}
 .setgrp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px 10px;margin-bottom:8px}
 .setgrp h3{margin:8px 0 4px}
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:6px 0;min-height:36px}
+.bday{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.bday input{width:46px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 4px;background:var(--bg);position:static;opacity:1;pointer-events:auto;min-height:36px}
+.item.late .txt small{color:var(--danger)}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
@@ -357,6 +360,7 @@ details.goal .item{border-top:1px solid var(--line)}
     <div class="subtabs" id="mSub" role="group" aria-label="Money view">
       <button data-mv="pay" aria-pressed="true">Payday</button>
       <button data-mv="spend" aria-pressed="false">Spend</button>
+      <button data-mv="bills" aria-pressed="false">Bills</button>
       <button data-mv="debt" aria-pressed="false">Debts</button>
       <button data-mv="save" aria-pressed="false">Save</button>
       <button data-mv="set" aria-pressed="false">Setup</button>
@@ -410,6 +414,16 @@ details.goal .item{border-top:1px solid var(--line)}
       <h2>Average per pay period</h2>
       <p class="muted" style="margin:0 2px 8px">Last 4 finished pay periods.</p>
       <div class="mrows" id="mAvg"></div>
+    </div>
+    <div id="mv-bills" hidden>
+      <div class="datebar" style="margin-top:16px;color:var(--ink)">
+        <button class="nav" id="bPrev" aria-label="Previous month" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">‹</button>
+        <h2 id="bMonth" style="flex:1;margin:0;text-align:center"></h2>
+        <button class="nav" id="bNext" aria-label="Next month" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">›</button>
+      </div>
+      <div class="mrows" id="bSum" style="margin-top:10px"></div>
+      <p class="muted" style="margin:10px 2px 8px">Tick a bill when it comes out. Set the day of the month it's charged so it shows when it's due. Each month starts fresh.</p>
+      <div class="group" id="bList"></div>
     </div>
     <div id="mv-debt" hidden>
       <div id="mDebtSum"></div>
@@ -1188,6 +1202,7 @@ function thisPlan(P){
   const m = money();
   const startBals = m.debts.map(d => ({...d, bal:(+d.bal||0) + m.pays.filter(x=>x.per===P.key && x.debt===d.id).reduce((a,x)=>a+x.amt,0)}));
   const amt = planPeriod(P, startBals);
+  m.debts.forEach(d => { const pd = paidThisPer(P, d.id); if (pd > 0) amt[d.id] = pd; });
   const debtTotal = Object.values(amt).reduce((a,b)=>a+b,0);
   const oneOut = oneOutFor(P);
   const save = (+m.pay||0) - debtTotal - billsPerPay() - budgetTotal() - oneOut;
@@ -1205,7 +1220,41 @@ function simulate(P0, fromNext){
   return {when, n, ok: !bals.some(d => d.bal > 0.5)};
 }
 function payDate(P, i, fromNext){ const d = new Date(fromNext ? P.next : P.s); d.setDate(d.getDate() + 14*i); return d; }
-let mCat = "groceries";
+let mCat = "groceries", bOff = 0;
+function renderBills(){
+  const m = money(), t = today();
+  if (!m.billPaid) m.billPaid = {};
+  const base = new Date(t.getFullYear(), t.getMonth() + bOff, 1, 12);
+  const mk2 = base.getFullYear() + "-" + String(base.getMonth()+1).padStart(2,"0");
+  const last = new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+  $("bMonth").textContent = base.toLocaleDateString(undefined,{month:"long", year:"numeric"});
+  const paidMap = m.billPaid[mk2] = m.billPaid[mk2] || {};
+  const isNow = bOff === 0, past = bOff < 0;
+  const rows = m.bills.map(b => ({b, day: b.day ? Math.min(+b.day, last) : null, paid: paidMap[b.n]}));
+  rows.sort((x,y) => (!!x.paid - !!y.paid) || ((x.day||99) - (y.day||99)));
+  const tot = m.bills.reduce((a,b)=>a+(+b.a||0),0), pd = rows.filter(r=>r.paid).reduce((a,r)=>a+(+r.b.a||0),0);
+  const sum = $("bSum"); sum.innerHTML = "";
+  const srow = (a, b, cls) => { const r = mk("div","mrow"+(cls?" "+cls:"")); r.append(mk("span",null,a), mk("b",null,b)); sum.appendChild(r); };
+  srow("Paid this month", $$(pd)); srow("Still to come out", $$(Math.round((tot-pd)*100)/100)); srow("Total bills", $$(Math.round(tot*100)/100), "total");
+  const list = $("bList"); list.innerHTML = "";
+  if (!rows.length) list.appendChild(mk("div","empty","No bills yet. Add them in Setup."));
+  rows.forEach(({b, day, paid}) => {
+    let sub = $$(+b.a||0);
+    const late = !paid && day && (past || (isNow && day < t.getDate()));
+    if (paid) sub += " · paid " + dOf(paid).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+    else if (day){ const dd = new Date(base.getFullYear(), base.getMonth(), day, 12); const n = daysBetween(t, dd);
+      sub += " · due " + dd.toLocaleDateString(undefined,{month:"short",day:"numeric"}) + (isNow ? (n===0 ? " (today)" : n===1 ? " (tomorrow)" : n<0 ? " (should have come out, check the bank app)" : " (in " + n + " days)") : ""); }
+    else sub += " · set the day it's charged →";
+    const r = checkRowM(b.n, sub, !!paid, on => { if (on) paidMap[b.n] = isNow ? key(t) : key(new Date(base.getFullYear(), base.getMonth(), day||1, 12)); else delete paidMap[b.n]; save(); renderBills(); });
+    if (late) r.classList.add("late");
+    const dw = mk("label","bday"); dw.append(mk("span",null,"Day"));
+    const di = mk("input"); di.inputMode = "numeric"; di.value = b.day || ""; di.setAttribute("aria-label", "Day of month " + b.n + " is charged");
+    di.addEventListener("click", e => e.stopPropagation());
+    di.addEventListener("change", () => { const v = parseInt(di.value); b.day = v>=1 && v<=31 ? v : null; save(); renderBills(); });
+    dw.appendChild(di); dw.addEventListener("click", e => e.preventDefault());
+    r.appendChild(dw); list.appendChild(r);
+  });
+}
 function mk(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text!=null) e.textContent = text; return e; }
 function checkRowM(label, sub, checked, onChange){
   const lab = mk("label", "item" + (checked ? " done" : ""));
@@ -1225,10 +1274,10 @@ function renderMoney(){
     const go = mk("button","btn","Start"); go.style.background = "var(--kit)"; go.style.color = "var(--pitch)";
     go.onclick = () => { if (di.value){ m.payday = di.value; save(); renderMoney(); renderChecklist(); renderHeader(); } };
     row.append(di, go); head.appendChild(row);
-    ["mv-pay","mv-spend","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "none");
+    ["mv-pay","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "none");
     return;
   }
-  ["mv-pay","mv-spend","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "");
+  ["mv-pay","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "");
   const P = period(t), plan = thisPlan(P);
   const spentPer = m.spend.filter(x => inPer(x.d, P));
   const spent = spentPer.reduce((a,x)=>a+x.amt,0), bud = budgetTotal(), left = bud - spent;
@@ -1253,7 +1302,11 @@ function renderMoney(){
     if (ov!=null){ const rs = mk("button","linkbtn","Auto"); rs.setAttribute("aria-label","Back to automatic"); rs.onclick = () => { delete m.over[PP.key][d.id]; save(); renderMoney(); }; box.appendChild(rs); }
     r.append(l, box); container.appendChild(r);
   };
-  m.debts.forEach(d => { if ((plan.startBals.find(x=>x.id===d.id).bal||0) > 0.5) debtRow(pl, P, d, plan.amt[d.id]||0); });
+  m.debts.forEach(d => {
+    const pd = m.pays.filter(x => x.per===P.key && x.debt===d.id && x.auto);
+    if (pd.length) row(d.n, "−" + $$(pd.reduce((a,x)=>a+x.amt,0)), "Paid " + dOf(pd[pd.length-1].d).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " ✓");
+    else if ((plan.startBals.find(x=>x.id===d.id).bal||0) > 0.5) debtRow(pl, P, d, plan.amt[d.id]||0);
+  });
   row("Bills and subscriptions", "−" + $$(Math.round(billsPerPay())), $$(Math.round(m.bills.reduce((a,b)=>a+(+b.a||0),0))) + "/month: " + [...new Set(m.bills.map(b=>b.n.split(" (")[0]))].join(", "));
   if (plan.oneOut) row("Bills due before next payday", "−" + $$(plan.oneOut), m.oneoffs.filter(o => !o.inc && o.a && o.due && inPer(o.due, P)).map(o=>o.n).join(", "));
   row("Spending budget", "−" + $$(bud), "Groceries, eating out, weekends, transport, personal");
@@ -1283,13 +1336,22 @@ function renderMoney(){
   // ---- payday checklist
   const ch = $("mChecks"); ch.innerHTML = "";
   m.debts.forEach(d => {
-    const amt = plan.amt[d.id]; if (!(amt > 0)) return;
-    const paid = m.pays.find(x => x.per===P.key && x.debt===d.id && x.auto);
-    ch.appendChild(checkRowM("Pay " + d.n + " " + $$(amt), d.id==="friends" ? "e-Transfer, and send a quick message" : "From your bank app, right after payday", !!paid, on => {
-      if (on){ m.pays.push({id:Date.now()+d.id, debt:d.id, amt, d:key(t), per:P.key, auto:true}); d.bal = Math.max(0, (+d.bal||0) - amt); }
-      else { const i = m.pays.indexOf(paid); if (i>-1){ m.pays.splice(i,1); d.bal = (+d.bal||0) + paid.amt; } }
-      save(); renderMoney();
-    }));
+    const paid = m.pays.filter(x => x.per===P.key && x.debt===d.id && x.auto);
+    const amt = plan.amt[d.id]; if (!(amt > 0) && !paid.length) return;
+    if (paid.length){
+      const tot = paid.reduce((a,x)=>a+x.amt,0);
+      ch.appendChild(checkRowM("Paid " + d.n + " " + $$(tot), "Recorded " + dOf(paid[paid.length-1].d).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + ". Untick to undo.", true, on => {
+        if (!on){ paid.forEach(x => { m.pays.splice(m.pays.indexOf(x),1); d.bal = (+d.bal||0) + x.amt; }); save(); renderMoney(); }
+      }));
+      return;
+    }
+    const r = mk("div","item"); r.style.cursor = "default";
+    const txt = mk("span","txt"); txt.append(mk("span",null,"Pay " + d.n), mk("small",null,"Plan says " + $$(amt) + ". Type what you actually paid, then tap Paid."));
+    const inp = mk("input"); inp.inputMode = "decimal"; inp.value = Math.round(amt); inp.setAttribute("aria-label","Amount paid to " + d.n);
+    inp.style.cssText = "width:80px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg);position:static;opacity:1;pointer-events:auto";
+    const btn = mk("button","btn","Paid"); btn.style.padding = "8px 12px";
+    btn.onclick = () => { const v = parseFloat(inp.value); if (!(v>0)) { inp.focus(); return; } m.pays.push({id:Date.now()+d.id, debt:d.id, amt:v, d:key(t), per:P.key, auto:true}); d.bal = Math.max(0, (+d.bal||0) - v); save(); renderMoney(); };
+    r.append(txt, inp, btn); ch.appendChild(r);
   });
   if (plan.save >= 1){
     const g = m.goals.find(g=>g.saved<g.target) || m.goals[0];
@@ -1316,6 +1378,7 @@ function renderMoney(){
   });
   if (!m.oneoffs.length) oo.appendChild(mk("div","empty","Nothing coming up. Add bills or refunds you know about."));
 
+  renderBills();
   // ---- spend
   const cats = $("mCats"); cats.innerHTML = "";
   MCATS.forEach(c => { const b = mk("button", null, c.n); b.setAttribute("aria-pressed", c.id===mCat); b.onclick = () => { mCat = c.id; renderMoney(); }; cats.appendChild(b); });
@@ -1420,7 +1483,7 @@ function renderMoney(){
   const g2 = grp("Spending budget per paycheque");
   MCATS.forEach(c => num(g2, c.n, m.budgets[c.id], v => m.budgets[c.id] = parseFloat(v)||0));
   const g3 = grp("Monthly bills");
-  m.bills.forEach((b,i) => { const r = num(g3, b.n + " ($/month)", b.a, v => b.a = parseFloat(v)||0); const x = mk("button","linkbtn","Remove " + b.n); x.onclick = () => { m.bills.splice(i,1); save(); renderMoney(); }; g3.appendChild(x); });
+  m.bills.forEach((b,i) => { const r = num(g3, b.n + " ($/month)", b.a, v => b.a = parseFloat(v)||0); num(g3, "  Day of month charged", b.day, v => { const n = parseInt(v); b.day = n>=1 && n<=31 ? n : null; }); const x = mk("button","linkbtn","Remove " + b.n); x.onclick = () => { m.bills.splice(i,1); save(); renderMoney(); }; g3.appendChild(x); });
   const nb = mk("div","mform"); const bn = mk("input"); bn.placeholder = "New bill"; bn.setAttribute("aria-label","New bill name"); const ba = mk("input"); ba.inputMode = "decimal"; ba.placeholder = "$/month"; ba.setAttribute("aria-label","Monthly amount"); const bad = mk("button","btn","Add");
   bad.onclick = () => { if (!bn.value.trim()) { bn.focus(); return; } m.bills.push({n:bn.value.trim(), a:parseFloat(ba.value)||0}); save(); renderMoney(); };
   nb.append(bn, ba, bad); g3.appendChild(nb);
@@ -1442,6 +1505,8 @@ $("sAdd").onclick = () => {
   const dd = day(key(today())); dd.checks.spendlog = true;
   save(); renderMoney(); renderChecklist(); renderHeader();
 };
+$("bPrev").onclick = () => { bOff--; renderBills(); };
+$("bNext").onclick = () => { bOff++; renderBills(); };
 $("oAdd").onclick = () => {
   const n = $("oName").value.trim(); if (!n) { $("oName").focus(); return; }
   money().oneoffs.push({id:"o"+Date.now(), n, a:parseFloat($("oAmt").value)||null, due:$("oDue").value||null, inc:$("oInc").checked, done:false});
@@ -1461,7 +1526,7 @@ function showTab(name){
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
 document.querySelectorAll("#mSub button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#mSub button").forEach(x => x.setAttribute("aria-pressed", x===b));
-  ["pay","spend","debt","save","set"].forEach(v => $("mv-"+v).hidden = v !== b.dataset.mv);
+  ["pay","spend","bills","debt","save","set"].forEach(v => $("mv-"+v).hidden = v !== b.dataset.mv);
 });
 document.querySelectorAll("#tab-goals .subtabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#tab-goals .subtabs button").forEach(x => x.setAttribute("aria-pressed", x===b));
