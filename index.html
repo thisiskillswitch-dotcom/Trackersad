@@ -221,6 +221,31 @@ details.goal .item{border-top:1px solid var(--line)}
 .setrow.w3{grid-template-columns:1fr 90px 90px}
 .setgrp{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 14px 10px;margin-bottom:8px}
 .setgrp h3{margin:8px 0 4px}
+#mSub{display:grid;grid-template-columns:repeat(4,1fr)}
+:root{--good:#2F7D5B}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--good:#7CC79F} }
+:root[data-theme="dark"]{--good:#7CC79F}
+.alert.info{border-left-color:var(--kit)}
+.cmp{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cmp .cr{display:grid;grid-template-columns:1fr 62px 62px 62px;gap:6px;padding:9px 12px;border-top:1px solid var(--line);font-size:14px;align-items:baseline}
+.cmp .cr:first-child{border-top:0}
+.cmp .cr > span:not(:first-child){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmp .cr small{display:block;color:var(--muted);font-size:12px;line-height:1.3}
+.cmp .cr.h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:7px;padding-bottom:7px}
+.cmp .cr.sec{grid-template-columns:1fr;background:var(--bg);font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:15px;color:var(--muted);padding-top:6px;padding-bottom:6px}
+.cmp .cr.tot{background:var(--grass);font-weight:600}
+.cmp .cr.hist{grid-template-columns:1fr 84px 84px 56px;cursor:pointer}
+.cmp .cr.hist.on{background:var(--grass)}
+.cmp .bad{color:var(--danger);font-weight:600}
+.cmp .good{color:var(--good);font-weight:600}
+.sbars .lbl{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:10px 2px 4px}
+.sbar{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.sbar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 2px 0;font-size:13px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;background:var(--c);vertical-align:-1px}
+.gapcard ul{margin:6px 0 4px;padding-left:18px;font-size:14px}
+.gapcard li{margin:4px 0}
+.outbtn{width:100%;margin-top:12px;background:var(--card);color:var(--ink);border:1px solid var(--line)}
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:6px 0;min-height:36px}
 .bday{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
 .bday input{width:46px;text-align:center;border:1px solid var(--line);border-radius:8px;padding:6px 4px;background:var(--bg);position:static;opacity:1;pointer-events:auto;min-height:36px}
@@ -389,6 +414,7 @@ details.goal .item{border-top:1px solid var(--line)}
     <div class="mcard" id="mHead"></div>
     <div class="subtabs" id="mSub" role="group" aria-label="Money view">
       <button data-mv="pay" aria-pressed="true">Payday</button>
+      <button data-mv="act" aria-pressed="false">Actual</button>
       <button data-mv="spend" aria-pressed="false">Spend</button>
       <button data-mv="bills" aria-pressed="false">Bills</button>
       <button data-mv="debt" aria-pressed="false">Debts</button>
@@ -399,6 +425,8 @@ details.goal .item{border-top:1px solid var(--line)}
       <h2>This paycheck's plan</h2>
       <div class="mrows" id="mPlan"></div>
       <div id="mAlerts"></div>
+      <div id="mGap"></div>
+      <button class="btn outbtn" id="toAct">Compare the plan with where the money actually went →</button>
       <h2>Next paycheque</h2>
       <p class="muted" style="margin:0 2px 8px">Plan ahead. Change any debt amount and the debt-free date updates.</p>
       <div class="mrows" id="mNext"></div>
@@ -427,9 +455,29 @@ details.goal .item{border-top:1px solid var(--line)}
         <li><b>Car waits</b> until you're debt-free, and plan for winter rent before January.</li>
       </ul></div>
     </div>
+    <div id="mv-act" hidden>
+      <div class="datebar" style="margin-top:16px;color:var(--ink)">
+        <button class="nav" id="aPrev" aria-label="Previous paycheque" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">‹</button>
+        <h2 id="aTitle" style="flex:1;margin:0;text-align:center;font-size:19px"></h2>
+        <button class="nav" id="aNext" aria-label="Next paycheque" style="background:var(--card);color:var(--ink);border:1px solid var(--line)">›</button>
+      </div>
+      <div class="mcard" id="aHead"></div>
+      <h2>Plan vs actual</h2>
+      <div class="sbars" id="aBars"></div>
+      <div class="cmp" id="aTable" style="margin-top:12px"></div>
+      <p class="muted" style="margin:6px 2px 0" id="aEst"></p>
+      <h2>What this means</h2>
+      <div id="aNotes"></div>
+      <h2>Check against your bank</h2>
+      <div id="aBank"></div>
+      <h2>Paycheque by paycheque</h2>
+      <p class="muted" style="margin:0 2px 8px">Tap one to open it.</p>
+      <div class="cmp" id="aHist"></div>
+    </div>
     <div id="mv-spend" hidden>
       <h2>Add spending</h2>
       <div class="chips" id="mCats"></div>
+      <p class="muted" id="mCatHint" style="margin:6px 2px 0"></p>
       <div class="mform">
         <input id="sAmt" inputmode="decimal" placeholder="$ amount" aria-label="Amount">
         <input id="sNote" placeholder="What (optional)" aria-label="Note">
@@ -437,8 +485,7 @@ details.goal .item{border-top:1px solid var(--line)}
       </div>
       <h2>Budgets this pay period</h2>
       <div class="bud" id="mBud"></div>
-      <h2>Where your paycheck is going</h2>
-      <div class="bud" id="mWhere"></div>
+      <button class="btn outbtn" id="toAct2">See where this paycheque went vs the plan →</button>
       <h2>Logged this pay period</h2>
       <div class="log" id="mLog"></div>
       <h2>Average per pay period</h2>
@@ -1259,6 +1306,8 @@ function money(){
   ];
   if (!m.checks) m.checks = {};
   if (!m.over) m.over = {};
+  if (!m.pp) m.pp = {};
+  if (!m.snap) m.snap = {};
   if (!m.mig2){ m.mig2 = true; setTimeout(save, 0);
     [["Bus pass",70],["DashPass",11.49],["Netflix",21.84],["Claude Pro",32],["Uber One (account 1)",11.49],["Uber One (account 2)",11.49],["Spotify",16.09]]
       .forEach(([n,a]) => { if (!m.bills.some(b => b.n === n)) m.bills.push({n, a}); });
@@ -1283,6 +1332,19 @@ function period(d){
 const inPer = (dstr, P) => dstr >= key(P.s) && dstr <= key(P.e);
 const billsPerPay = () => money().bills.reduce((a,b)=>a+(+b.a||0),0) * 12 / 26;
 const budgetTotal = () => MCATS.reduce((a,c)=>a+(+money().budgets[c.id]||0),0);
+// per-paycheque settings (paycheque amount, money already in the account, bills, spending budget)
+const SURPRISE = {id:"surprise", n:"Surprise / one-time"};
+const catName = id => (MCATS.concat([SURPRISE]).find(c=>c.id===id)||{n:id}).n;
+const sumv = o => Object.values(o).reduce((a,b)=>a+(+b||0),0);
+const shortD = d => d.toLocaleDateString(undefined,{month:"short", day:"numeric"});
+function pv(P){ const m = money(); return m.pp[P.key] || {}; }
+function setPv(P, k, v){ const m = money(); const o = m.pp[P.key] = m.pp[P.key] || {}; if (v==null) delete o[k]; else o[k] = v; if (!Object.keys(o).length) delete m.pp[P.key]; }
+const payFor = P => pv(P).pay != null ? +pv(P).pay : (+money().pay||0);
+const extraFor = P => +pv(P).extra || 0;
+const billsFor = P => pv(P).bills != null ? +pv(P).bills : billsPerPay();
+const budFor = P => pv(P).bud != null ? +pv(P).bud : budgetTotal();
+const surpriseFor = P => money().spend.filter(x => x.cat==="surprise" && inPer(x.d, P)).reduce((a,x)=>a+x.amt,0);
+const inFor = P => money().oneoffs.filter(o => o.inc && o.a && o.due && inPer(o.due, P)).reduce((a,o)=>a+(+o.a),0);
 // one paycheque of debt payments: planned amounts, over-limit cards brought back under, paid-off money rolled to the next debt
 function planFor(debts){
   const T = debts.reduce((a,d)=>a+(+d.plan||0),0), amt = {};
@@ -1307,7 +1369,7 @@ function planPeriod(P, bals){
   const free = bals.filter(d => ov[d.id]==null);
   const amt = planFor(free);
   bals.forEach(d => { if (ov[d.id]!=null) amt[d.id] = Math.min(Math.max(0,d.bal), +ov[d.id]||0); });
-  const avail = (+m.pay||0) - billsPerPay() - budgetTotal() - oneOutFor(P);
+  const avail = payFor(P) + extraFor(P) + inFor(P) - billsFor(P) - budFor(P) - oneOutFor(P) - surpriseFor(P);
   let over = Object.values(amt).reduce((a,b)=>a+b,0) - avail;
   for (let j = bals.length-1; j >= 0 && over > 0; j--){
     const d = bals[j]; if (ov[d.id]!=null) continue;
@@ -1321,11 +1383,52 @@ function thisPlan(P){
   const m = money();
   const startBals = m.debts.map(d => ({...d, bal:(+d.bal||0) + m.pays.filter(x=>x.per===P.key && x.debt===d.id).reduce((a,x)=>a+x.amt,0)}));
   const amt = planPeriod(P, startBals);
+  const planned = {...amt};
   m.debts.forEach(d => { const pd = paidThisPer(P, d.id); if (pd > 0) amt[d.id] = pd; });
-  const debtTotal = Object.values(amt).reduce((a,b)=>a+b,0);
-  const oneOut = oneOutFor(P);
-  const save = (+m.pay||0) - debtTotal - billsPerPay() - budgetTotal() - oneOut;
-  return {amt, debtTotal, save, oneOut, startBals};
+  const debtTotal = sumv(amt);
+  const oneOut = oneOutFor(P), surp = surpriseFor(P), inc = inFor(P);
+  const save = payFor(P) + extraFor(P) + inc - debtTotal - billsFor(P) - budFor(P) - oneOut - surp;
+  return {amt, planned, debtTotal, save, oneOut, startBals, surp, inc};
+}
+// what the plan said for a paycheque (saved while it was the current one; estimated for older ones)
+function mkSnap(Q, amt){
+  const m = money(), r = budgetTotal() ? budFor(Q)/budgetTotal() : 1;
+  const one = m.oneoffs.filter(o => !o.inc && o.a && o.due && inPer(o.due, Q)).map(o => ({n:o.n, a:+o.a}));
+  const cats = {}; MCATS.forEach(c => cats[c.id] = Math.round((+m.budgets[c.id]||0)*r));
+  const debts = {}; m.debts.forEach(d => debts[d.id] = Math.round(amt[d.id]||0));
+  const pay = payFor(Q), extra = extraFor(Q), inc = inFor(Q), bills = Math.round(billsFor(Q)), bud = Math.round(budFor(Q)), surp = Math.round(surpriseFor(Q));
+  const inn = pay + extra + inc;
+  const save = Math.round(inn - sumv(debts) - bills - one.reduce((a,o)=>a+o.a,0) - bud - surp);
+  return {pay, extra, inc, inn, debts, bills, one, bud, cats, surp, save};
+}
+function planOf(Q){
+  const m = money();
+  if (m.snap[Q.key]) return m.snap[Q.key];
+  const bals = m.debts.map(d => ({...d, bal:(+d.bal||0) + m.pays.filter(x => x.debt===d.id && x.per >= Q.key).reduce((a,x)=>a+x.amt,0)}));
+  // older paycheques: if debts were paid from the Payday checklist, that's taken as the plan; savings plan unknown
+  const auto = {}; let anyAuto = false;
+  m.debts.forEach(d => { auto[d.id] = m.pays.filter(x => x.per===Q.key && x.debt===d.id && x.auto).reduce((a,x)=>a+x.amt,0); if (auto[d.id]) anyAuto = true; });
+  const s = mkSnap(Q, anyAuto ? auto : planPeriod(Q, bals)); s.est = true; if (s.save > 0) s.save = 0;
+  return s;
+}
+function actualOf(Q){
+  const m = money();
+  const debts = {}; m.debts.forEach(d => debts[d.id] = m.pays.filter(x => x.per===Q.key && x.debt===d.id).reduce((a,x)=>a+x.amt,0));
+  const saved = m.deps.filter(x => x.per===Q.key).reduce((a,x)=>a+(+x.amt||0),0);
+  const bills = []; Object.values(m.billPaid||{}).forEach(mp => Object.entries(mp).forEach(([n, d]) => { if (d && inPer(d, Q)){ const b = m.bills.find(b=>b.n===n); bills.push({n, a: b ? (+b.a||0) : 0}); } }));
+  const one = m.oneoffs.filter(o => !o.inc && o.done && o.a && inPer(o.paidOn || o.due || "", Q)).map(o => ({n:o.n, a:+o.a}));
+  const inc = m.oneoffs.filter(o => o.inc && o.done && o.a && inPer(o.got || o.due || "", Q)).reduce((a,o)=>a+(+o.a),0);
+  const sp = m.spend.filter(x => inPer(x.d, Q));
+  const cats = {}; MCATS.forEach(c => cats[c.id] = sp.filter(x=>x.cat===c.id).reduce((a,x)=>a+x.amt,0));
+  const surp = sp.filter(x => x.cat==="surprise");
+  const a = {debts, saved, bills, one, inc, cats, surp, pay:payFor(Q), extra:extraFor(Q)};
+  a.billsT = bills.reduce((s,x)=>s+x.a,0); a.oneT = one.reduce((s,x)=>s+x.a,0); a.surpT = surp.reduce((s,x)=>s+x.amt,0);
+  a.spendT = sumv(cats); a.debtT = sumv(debts);
+  a.inn = a.pay + a.extra + inc;
+  a.out = a.debtT + saved + a.billsT + a.oneT + a.surpT + a.spendT;
+  a.left = a.inn - a.out;
+  a.any = a.debtT || saved || a.billsT || a.oneT || a.surpT || a.spendT;
+  return a;
 }
 function simulate(P0, fromNext){
   const m = money(); let bals = m.debts.map(d => ({...d, bal:Math.max(0,+d.bal||0)}));
@@ -1374,6 +1477,150 @@ function renderBills(){
     r.appendChild(dw); list.appendChild(r);
   });
 }
+let aOff = 0;
+const SEGS = [["debt","Debts","#2F7D5B"],["save","Savings","#E8C547"],["bills","Bills","#7C9A8D"],["one","One-time bills","#4A6FA5"],["surp","Surprise","#B4483A"],["spend","Spending","#D98E3B"]];
+function renderActual(){
+  const m = money(); if (!m.payday) return;
+  const t = today(), P0 = period(t);
+  if (aOff > 0) aOff = 0;
+  const qd = new Date(P0.s); qd.setDate(qd.getDate() + 14*aOff); const Q = period(qd);
+  const isNow = aOff === 0;
+  const p = planOf(Q), a = actualOf(Q);
+  const pDebt = sumv(p.debts), pOne = p.one.reduce((s,o)=>s+o.a,0), pSave = Math.max(0, p.save);
+  const pSurp = p.surp || 0;
+  const pOut = pDebt + p.bills + pOne + pSurp + p.bud + pSave;
+  $("aTitle").textContent = shortD(Q.s) + " – " + shortD(Q.e);
+  $("aNext").disabled = isNow; $("aNext").style.opacity = isNow ? .35 : 1;
+  const dayN = daysBetween(Q.s, t) + 1, dLeft = daysBetween(t, Q.e) + 1;
+
+  // head
+  const hd = $("aHead"); hd.innerHTML = "";
+  hd.append(mk("small",null, isNow ? "This paycheque · day " + dayN + " of 14 · not used yet" : (a.left >= 0 ? "Left over at the end" : "Went over")));
+  hd.append(mk("div","big" + (a.left < 0 ? " neg" : ""), $$(Math.round(a.left))));
+  hd.append(mk("small",null, "In " + $$(Math.round(a.inn)) + " · out " + $$(Math.round(a.out)) + (isNow ? " so far" : "") + " · the plan had " + $$(Math.round(pOut)) + " going out"));
+
+  // stacked bars
+  const seg = { plan: {debt:pDebt, save:pSave, bills:p.bills, one:pOne, surp:pSurp, spend:p.bud},
+                act:  {debt:a.debtT, save:Math.max(0,a.saved), bills:a.billsT, one:a.oneT, surp:a.surpT, spend:a.spendT} };
+  const scale = Math.max(1, p.inn, a.inn, sumv(seg.plan), sumv(seg.act));
+  const bars = $("aBars"); bars.innerHTML = "";
+  [["plan","Plan"],["act", isNow ? "Actual so far" : "Actual"]].forEach(([k, n]) => {
+    const tot = sumv(seg[k]), inn = k==="plan" ? p.inn : a.inn;
+    const lb = mk("div","lbl"); lb.append(mk("span",null,n), mk("span",null, $$(Math.round(tot)) + " of " + $$(Math.round(inn)))); bars.appendChild(lb);
+    const b = mk("div","sbar"); b.setAttribute("role","img"); b.setAttribute("aria-label", n + ": " + SEGS.map(s => s[1] + " " + $$(Math.round(seg[k][s[0]]))).join(", "));
+    SEGS.forEach(([id,,col]) => { const v = seg[k][id]; if (v > 0){ const i = mk("i"); i.style.width = (v/scale*100) + "%"; i.style.background = col; b.appendChild(i); } });
+    bars.appendChild(b);
+  });
+  const lg = mk("div","legend"); SEGS.forEach(([,n,col]) => { const s = mk("span",null,n); s.style.setProperty("--c", col); lg.appendChild(s); }); bars.appendChild(lg);
+
+  // table
+  const tb = $("aTable"); tb.innerHTML = "";
+  const sec = n => tb.appendChild(mk("div","cr sec",n));
+  const cr = (name, sub, pl, ac, kind, cls) => {
+    const r = mk("div","cr" + (cls ? " " + cls : "")); const n = mk("span",null,name); if (sub) n.appendChild(mk("small",null,sub));
+    const diff = Math.round(ac) - Math.round(pl);
+    let dt = Math.abs(diff) < 1 ? "—" : (diff > 0 ? "+" : "−") + $$(Math.abs(diff)), cl = "";
+    if (kind === "x") dt = "";
+    else if (kind === "pay" && isNow && ac < 1 && pl >= 1) dt = "to do";
+    else if (kind === "pay"){ if (diff <= -1 && (!isNow || ac >= 1)) cl = "bad"; else if (diff >= 1) cl = "good"; }
+    else if (kind === "cost"){ if (diff >= 1) cl = "bad"; else if (diff <= -1 && !isNow) cl = "good"; }
+    const d = mk("span", cl || null, dt);
+    r.append(n, mk("span",null,$$(Math.round(pl))), mk("span",null,$$(Math.round(ac))), d); tb.appendChild(r);
+  };
+  const hr = mk("div","cr h"); hr.append(mk("span",null,""), mk("span",null,"Plan"), mk("span",null,"Actual"), mk("span",null,"Diff")); tb.appendChild(hr);
+  sec("Money in");
+  cr("Paycheque", null, p.pay, a.pay, "n");
+  if (p.extra || a.extra || p.inc || a.inc) cr("Other money", "Already in your account, refunds", p.extra + p.inc, a.extra + a.inc, "n");
+  sec("Debts");
+  m.debts.forEach(d => { const pl = p.debts[d.id]||0, ac = a.debts[d.id]||0; if (pl || ac) cr(d.n, null, pl, ac, "pay"); });
+  if (!pDebt && !a.debtT) cr("No debt payments", null, 0, 0, "n");
+  sec("Bills");
+  cr("Monthly bills", a.bills.length ? a.bills.map(x => x.n.split(" (")[0]).join(", ") : "Tick bills in Bills when they come out", p.bills, a.billsT, "n");
+  const oneNames = [...new Set(p.one.map(o=>o.n).concat(a.one.map(o=>o.n)))];
+  oneNames.forEach(n => cr(n, "One-time", p.one.filter(o=>o.n===n).reduce((s,o)=>s+o.a,0), a.one.filter(o=>o.n===n).reduce((s,o)=>s+o.a,0), "n"));
+  cr("Surprise costs", a.surp.length ? a.surp.map(x => x.note || "no note").join(", ") : "Log them in Spend → Surprise", pSurp, a.surpT, "cost");
+  sec("Spending");
+  MCATS.forEach(c => cr(c.n, null, p.cats[c.id]||0, a.cats[c.id]||0, "cost"));
+  cr("All spending", null, p.bud, a.spendT, "cost", "tot");
+  sec("Savings");
+  cr("To savings", null, pSave, a.saved, "pay");
+  cr("Total out", null, pOut, a.out, isNow ? "x" : "n", "tot");
+  cr(isNow ? "Not used yet" : "Left over", p.save < 0 ? "The plan was short from the start" : null, p.inn - pOut, a.left, "x", "tot");
+  $("aEst").textContent = p.est ? "This paycheque is from before this page existed, so its plan is estimated: debt payments are what you ticked on the Payday checklist, and budgets are today's." : "";
+
+  // what it means
+  const notes = [];
+  const first = p.first || p.debts;
+  m.debts.forEach(d => {
+    const pl = p.debts[d.id]||0, ac = a.debts[d.id]||0, f0 = first[d.id];
+    if (f0 != null && Math.abs(f0 - pl) >= 1) notes.push(["info", "You changed the plan for " + d.n + " from " + $$(f0) + " to " + $$(pl) + " this paycheque."]);
+    if (isNow && ac < 1 && pl >= 1) notes.push(["info", d.n + ": " + $$(pl) + " planned, not paid yet. Record it on the Payday checklist when you pay."]);
+    else if (pl - ac >= 1) notes.push(["bad", d.n + ": paid " + $$(Math.round(ac)) + " of the " + $$(pl) + " plan, " + $$(Math.round(pl - ac)) + " less." + (d.limit && +d.bal > d.limit ? " It's still " + $$(Math.round(+d.bal - d.limit)) + " over its limit, so the over-limit fee risk stays." : "")]);
+    else if (ac - pl >= 1) notes.push(["ok", d.n + ": paid " + $$(Math.round(ac - pl)) + " more than planned."]);
+  });
+  const shortDebt = m.debts.reduce((s,d) => { const pl = p.debts[d.id]||0, ac = a.debts[d.id]||0; return s + ((!isNow || ac >= 1) ? Math.max(0, pl - ac) : 0); }, 0);
+  const perPay = m.debts.reduce((s,d)=>s+(+d.plan||0),0) || 1;
+  if (shortDebt >= 1 && m.debts.some(d => +d.bal > 0.5)){
+    const n = shortDebt / perPay;
+    notes.push(["bad", "Paying " + $$(Math.round(shortDebt)) + " less to debt pushes your debt-free date back by about " + (n < 0.75 ? "a week" : Math.round(n) + " paycheque" + (Math.round(n) > 1 ? "s" : "")) + ". Check Debts for the new date."]);
+  }
+  if (a.surpT >= 1) notes.push(["bad", "Surprise costs: " + $$(Math.round(a.surpT)) + " (" + a.surp.map(x => (x.note || "no note") + " " + $$(x.amt)).join(", ") + ")." + (pSurp >= a.surpT - 1 ? " You adjusted the plan to cover them." : " Lower a debt payment or a budget on Payday to cover them, or they'll come out of savings.") + " If one will repeat, add it as a monthly bill in Setup."]);
+  MCATS.forEach(c => { const pl = p.cats[c.id]||0, ac = a.cats[c.id]||0; if (ac - pl >= 1) notes.push(["bad", c.n + ": " + $$(Math.round(ac)) + " of " + $$(pl) + ", " + $$(Math.round(ac - pl)) + " over."]); });
+  if (isNow){
+    const lft = p.bud - a.spendT;
+    notes.push([lft >= 0 ? "ok" : "bad", lft >= 0 ? "Spending: " + $$(Math.round(a.spendT)) + " of " + $$(p.bud) + " so far. " + $$(Math.round(lft)) + " left for " + dLeft + " day" + (dLeft > 1 ? "s" : "") + ", about " + $$(Math.floor(lft/dLeft)) + " a day." : "Spending is " + $$(Math.round(-lft)) + " over budget with " + dLeft + " day" + (dLeft > 1 ? "s" : "") + " to go. Groceries only until payday."]);
+  } else if (a.spendT >= 1 || p.bud){
+    const df = a.spendT - p.bud;
+    notes.push([df > 0 ? "bad" : "ok", "Spending: " + $$(Math.round(a.spendT)) + " of " + $$(p.bud) + (df > 0 ? ", " + $$(Math.round(df)) + " over." : ", " + $$(Math.round(-df)) + " under.")]);
+  }
+  if (p.save < -0.5) notes.push(["bad", "This paycheque's plan was " + $$(Math.round(-p.save)) + " short from the start."]);
+  else if (!isNow && pSave >= 1 && a.saved < pSave - 1) notes.push(["bad", "Savings: " + $$(Math.round(a.saved)) + " of the " + $$(pSave) + " planned."]);
+  if (!isNow){
+    if (!a.billsT) notes.push(["info", "No bills ticked in Bills for these dates, so the bills line shows $0."]);
+    else if (Math.abs(a.billsT - p.bills) >= 20) notes.push(["info", "Bills that came out: " + $$(Math.round(a.billsT)) + " vs " + $$(p.bills) + " planned. Bills land unevenly. Setting aside the same amount every payday (your bills bucket) evens it out."]);
+    if (a.left >= 20) notes.push(["info", $$(Math.round(a.left)) + " isn't accounted for. If it's still in your account, type it as “Already in your account” on the next paycheque. If not, some spending wasn't logged."]);
+  }
+  if (!a.any && !isNow) notes.length = 0, notes.push(["info", "Nothing was recorded for this paycheque."]);
+  if (!notes.length) notes.push(["ok", "Right on plan so far."]);
+  const nb = $("aNotes"); nb.innerHTML = "";
+  notes.forEach(([k, s]) => nb.appendChild(mk("div","alert" + (k==="bad" ? "" : " " + k), s)));
+
+  // bank check
+  const bk = $("aBank"); bk.innerHTML = "";
+  const o = pv(Q), card = mk("div","dcard");
+  card.appendChild(mk("p",null, isNow ? "Type what's in your chequing account now. The app compares it with what should be there from what you've logged. For this to work, put any money you started with in “Already in your account” on Payday." : "What was in chequing at the end of this paycheque, before the next one landed."));
+  const f = mk("div","mform"); const bi = mk("input"); bi.inputMode = "decimal"; bi.placeholder = "Chequing balance $"; bi.setAttribute("aria-label","Chequing balance"); if (o.bank) bi.value = o.bank.v;
+  const bb = mk("button","btn","Check"); bb.onclick = () => { const v = parseFloat(bi.value); if (isNaN(v)) { setPv(Q,"bank",null); } else setPv(Q,"bank",{v, d:key(t)}); save(); renderActual(); };
+  f.append(bi, bb); card.appendChild(f);
+  if (o.bank){
+    const diff = Math.round(a.left - o.bank.v);
+    const msg = Math.abs(diff) < 10 ? ["ok", "Matches your logs (checked " + shortD(dOf(o.bank.d)) + "). Everything is tracked."]
+      : diff > 0 ? ["bad", $$(diff) + " less than expected. That's spending you didn't log, or money moved to another account. Log it under Spend so this page stays right."]
+      : ["info", $$(-diff) + " more than expected. Maybe a payment you recorded hasn't come out yet, money came in that isn't logged, or you had money before this paycheque. Put that in “Already in your account”."];
+    card.appendChild(mk("div","alert" + (msg[0]==="bad" ? "" : " " + msg[0]), msg[1]));
+    card.appendChild(mk("p",null,"Expected from your logs: " + $$(Math.round(a.left)) + " · Bank: " + $$(o.bank.v)));
+  }
+  bk.appendChild(card);
+
+  // history
+  const hs = $("aHist"); hs.innerHTML = "";
+  const hh = mk("div","cr hist h"); hh.append(mk("span",null,"Paycheque"), mk("span",null,"Debts paid"), mk("span",null,"Spent"), mk("span",null,"Surprise")); hs.appendChild(hh);
+  for (let i = 0; i < 8; i++){
+    const dd = new Date(P0.s); dd.setDate(dd.getDate() - 14*i); const Qi = period(dd);
+    const ai = actualOf(Qi); if (i > 0 && !(ai.debtT || ai.spendT || ai.saved || ai.surpT) && !m.snap[Qi.key]) continue;
+    const pi = planOf(Qi);
+    const r = mk("div","cr hist" + (-i === aOff ? " on" : ""));
+    r.setAttribute("role","button"); r.tabIndex = 0;
+    r.append(mk("span",null, shortD(Qi.s) + (i === 0 ? " (now)" : "")));
+    const dp = mk("span",null, $$(Math.round(ai.debtT)) + "/" + $$(sumv(pi.debts))); if ((!i ? ai.debtT >= 1 : true) && ai.debtT < sumv(pi.debts) - 1) dp.className = "bad";
+    const sp = mk("span",null, $$(Math.round(ai.spendT)) + "/" + $$(pi.bud)); if (ai.spendT > pi.bud + 1) sp.className = "bad";
+    const su = mk("span",null, ai.surpT ? $$(Math.round(ai.surpT)) : "—"); if (ai.surpT) su.className = "bad";
+    r.append(dp, sp, su);
+    const go = () => { aOff = -i; renderActual(); window.scrollTo(0, $("tab-money").offsetTop); };
+    r.onclick = go; r.onkeydown = e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); go(); } };
+    hs.appendChild(r);
+  }
+}
 function mk(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text!=null) e.textContent = text; return e; }
 function checkRowM(label, sub, checked, onChange){
   const lab = mk("label", "item" + (checked ? " done" : ""));
@@ -1393,64 +1640,122 @@ function renderMoney(){
     const go = mk("button","btn","Start"); go.style.background = "var(--kit)"; go.style.color = "var(--pitch)";
     go.onclick = () => { if (di.value){ m.payday = di.value; save(); renderMoney(); renderChecklist(); renderHeader(); } };
     row.append(di, go); head.appendChild(row);
-    ["mv-pay","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "none");
+    ["mv-pay","mv-act","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "none");
     return;
   }
-  ["mv-pay","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "");
+  ["mv-pay","mv-act","mv-spend","mv-bills","mv-debt","mv-save","mv-set","mSub"].forEach(id => $(id).style.display = "");
   const P = period(t), plan = thisPlan(P);
   const spentPer = m.spend.filter(x => inPer(x.d, P));
-  const spent = spentPer.reduce((a,x)=>a+x.amt,0), bud = budgetTotal(), left = bud - spent;
+  const spentB = spentPer.filter(x => x.cat !== "surprise");
+  const spent = spentB.reduce((a,x)=>a+x.amt,0), bud = budFor(P), left = bud - spent, rB = budgetTotal() ? bud/budgetTotal() : 1;
   const dLeft = daysBetween(t, P.e) + 1, toPay = daysBetween(t, P.next);
   head.append(mk("small",null,"Left to spend until " + fmtD2(P.next)));
   head.append(mk("div","big" + (left<0?" neg":""), $$(left)));
   head.append(mk("small",null, left >= 0 ? "of " + $$(bud) + " this pay period · about " + $$(Math.floor(left/dLeft)) + " a day for " + dLeft + " day" + (dLeft>1?"s":"") : "Over budget by " + $$(-left) + ". Cut back until payday in " + toPay + " day" + (toPay>1?"s":"") + "."));
 
   // ---- plan
-  const pl = $("mPlan"); pl.innerHTML = "";
-  const row = (a, b, sub, cls) => { const r = mk("div","mrow"+(cls?" "+cls:"")); const l = mk("span",null,a); if (sub) l.appendChild(mk("small",null,sub)); r.append(l, mk("b",null,b)); pl.appendChild(r); };
-  row("Paycheque", $$(m.pay), fmtD2(P.s));
+  const prow = (box, a, b, sub, cls) => { const r = mk("div","mrow"+(cls?" "+cls:"")); const l = mk("span",null,a); if (sub) l.appendChild(mk("small",null,sub)); r.append(l, mk("b",null,b)); box.appendChild(r); return r; };
+  const boxCss = "width:84px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600";
+  const inRow = (box, label, sub, val, sign, onSet, isSet, onAuto, aria) => {
+    const r = mk("div","mrow"); const l = mk("span",null,label); if (sub) l.appendChild(mk("small",null,sub));
+    const bx = mk("span"); bx.style.cssText = "display:flex;align-items:center;gap:4px";
+    const inp = mk("input"); inp.inputMode = "decimal"; inp.value = val==null ? "" : val; inp.placeholder = "0"; inp.setAttribute("aria-label", aria || label);
+    inp.style.cssText = boxCss;
+    inp.addEventListener("change", () => { const v = inp.value.trim(); onSet(v === "" ? null : Math.max(0, parseFloat(v)||0)); save(); renderMoney(); });
+    bx.append(mk("b",null,sign), inp);
+    if (isSet && onAuto){ const rs = mk("button","linkbtn","Auto"); rs.setAttribute("aria-label", label + " back to automatic"); rs.onclick = () => { onAuto(); save(); renderMoney(); }; bx.appendChild(rs); }
+    r.append(l, bx); box.appendChild(r); return r;
+  };
   const debtRow = (container, PP, d, amtv) => {
     const ov = (m.over[PP.key]||{})[d.id];
     const r = mk("div","mrow"); const l = mk("span",null,d.n);
     l.appendChild(mk("small",null, ov!=null ? "You set this for this paycheque" : "Auto. Type a number to change it for this paycheque only"));
     const box = mk("span"); box.style.cssText = "display:flex;align-items:center;gap:4px";
     const inp = mk("input"); inp.inputMode = "decimal"; inp.value = Math.round(amtv); inp.setAttribute("aria-label", d.n + " payment for paycheque " + fmtD2(PP.s));
-    inp.style.cssText = "width:84px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:600";
+    inp.style.cssText = boxCss;
     inp.addEventListener("change", () => { const v = inp.value.trim(); m.over[PP.key] = m.over[PP.key] || {}; if (v === "") delete m.over[PP.key][d.id]; else m.over[PP.key][d.id] = Math.max(0, parseFloat(v)||0); save(); renderMoney(); });
     box.append(mk("b",null,"−$"), inp);
     if (ov!=null){ const rs = mk("button","linkbtn","Auto"); rs.setAttribute("aria-label","Back to automatic"); rs.onclick = () => { delete m.over[PP.key][d.id]; save(); renderMoney(); }; box.appendChild(rs); }
     r.append(l, box); container.appendChild(r);
   };
-  m.debts.forEach(d => {
-    const pd = m.pays.filter(x => x.per===P.key && x.debt===d.id && x.auto);
-    if (pd.length) row(d.n, "−" + $$(pd.reduce((a,x)=>a+x.amt,0)), "Paid " + dOf(pd[pd.length-1].d).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " ✓");
-    else if ((plan.startBals.find(x=>x.id===d.id).bal||0) > 0.5) debtRow(pl, P, d, plan.amt[d.id]||0);
-  });
-  row("Bills and subscriptions", "−" + $$(Math.round(billsPerPay())), $$(Math.round(m.bills.reduce((a,b)=>a+(+b.a||0),0))) + "/month: " + [...new Set(m.bills.map(b=>b.n.split(" (")[0]))].join(", "));
-  if (plan.oneOut) row("Bills due before next payday", "−" + $$(plan.oneOut), m.oneoffs.filter(o => !o.inc && o.a && o.due && inPer(o.due, P)).map(o=>o.n).join(", "));
-  row("Spending budget", "−" + $$(bud), "Groceries, eating out, weekends, transport, personal");
-  row(plan.save >= 0 ? "To savings" : "Short by", $$(Math.abs(Math.round(plan.save))), plan.save >= 0 ? (plan.save < 1 ? "Everything extra is going to debt right now" : "Goes to " + (m.goals.find(g=>g.saved<g.target)||m.goals[0]).n) : "Lower a budget or a debt payment in Setup", "total");
+  const billMonth = Math.round(m.bills.reduce((a,b)=>a+(+b.a||0),0));
+  const billNames = [...new Set(m.bills.map(b=>b.n.split(" (")[0]))].join(", ");
+  const planRows = (box, PP, amt, bals, isThis) => {
+    const o = pv(PP);
+    inRow(box, "Paycheque", fmtD2(PP.s) + (o.pay!=null ? " · changed for this one" : " · type the real amount if it's different"), Math.round(payFor(PP)*100)/100, "+$", v => setPv(PP,"pay",v), o.pay!=null, () => setPv(PP,"pay",null), "Paycheque amount " + fmtD2(PP.s));
+    if (isThis) inRow(box, "Already in your account", "Leftover from last time or savings you'll use. Leave empty if none", extraFor(PP) || "", "+$", v => setPv(PP,"extra", v ? v : null), false, null, "Money already in your account");
+    const incs = m.oneoffs.filter(x => x.inc && x.a && x.due && inPer(x.due, PP));
+    if (incs.length) prow(box, "Coming in", "+" + $$(inFor(PP)), incs.map(x=>x.n).join(", "));
+    m.debts.forEach(d => {
+      if (isThis){
+        const pd = m.pays.filter(x => x.per===PP.key && x.debt===d.id && x.auto);
+        if (pd.length){ prow(box, d.n, "−" + $$(pd.reduce((a,x)=>a+x.amt,0)), "Paid " + shortD(dOf(pd[pd.length-1].d)) + " ✓"); return; }
+      }
+      if (((bals.find(x=>x.id===d.id)||{}).bal||0) > 0.5) debtRow(box, PP, d, amt[d.id]||0);
+    });
+    inRow(box, "Bills and subscriptions", o.bills!=null ? "You set what comes out this paycheque ($" + billMonth + "/month in total)" : "$" + billMonth + "/month, averaged: " + billNames + ". Type what will really come out", Math.round(billsFor(PP)), "−$", v => setPv(PP,"bills",v), o.bills!=null, () => setPv(PP,"bills",null), "Bills this paycheque");
+    m.oneoffs.filter(x => !x.inc && x.a && x.due && inPer(x.due, PP)).forEach(x => inRow(box, x.n, "One-time · due " + shortD(dOf(x.due)) + (x.done ? " · paid ✓" : ""), Math.round(x.a*100)/100, "−$", v => { x.a = v; }, false, null, x.n + " amount"));
+    const sp = surpriseFor(PP);
+    if (sp) prow(box, "Surprise costs", "−" + $$(sp), m.spend.filter(x => x.cat==="surprise" && inPer(x.d,PP)).map(x => (x.note || "no note") + " " + $$(x.amt)).join(", ") + ". Logged in Spend");
+    inRow(box, "Spending budget", o.bud!=null ? "Changed for this paycheque (normally " + $$(budgetTotal()) + ")" : "Groceries, eating out, weekends, transport, personal", Math.round(budFor(PP)), "−$", v => setPv(PP,"bud",v), o.bud!=null, () => setPv(PP,"bud",null), "Spending budget this paycheque");
+  };
+  const pl = $("mPlan"); pl.innerHTML = "";
+  planRows(pl, P, plan.amt, plan.startBals, true);
+  prow(pl, plan.save >= 0 ? "To savings" : "Short by", $$(Math.abs(Math.round(plan.save))), plan.save >= 0 ? (plan.save < 1 ? "Everything extra is going to debt right now" : "Goes to " + (m.goals.find(g=>g.saved<g.target)||m.goals[0]).n) : "Ways to cover it are below", "total");
+  // remember what the plan said for this paycheque
+  { const sn = mkSnap(P, plan.planned), prev = m.snap[P.key];
+    sn.first = prev && prev.first ? prev.first : sn.debts;
+    if (JSON.stringify(prev) !== JSON.stringify(sn)){ m.snap[P.key] = sn; saveLocal(); } }
   // next paycheque preview
   const PN = period(P.next);
   const nxb = m.debts.map(d => ({...d, bal: Math.max(0, (+d.bal||0) - Math.max(0, (plan.amt[d.id]||0) - paidThisPer(P, d.id)))}));
   const namt = planPeriod(PN, nxb), nOne = oneOutFor(PN);
-  const nsave = (+m.pay||0) - Object.values(namt).reduce((a,b)=>a+b,0) - billsPerPay() - budgetTotal() - nOne;
+  const nsave = payFor(PN) + extraFor(PN) + inFor(PN) - sumv(namt) - billsFor(PN) - budFor(PN) - nOne - surpriseFor(PN);
   const np = $("mNext"); np.innerHTML = "";
-  const nrow = (a, b, sub, cls) => { const r = mk("div","mrow"+(cls?" "+cls:"")); const l = mk("span",null,a); if (sub) l.appendChild(mk("small",null,sub)); r.append(l, mk("b",null,b)); np.appendChild(r); };
-  nrow("Paycheque", $$(m.pay), fmtD2(PN.s));
-  m.debts.forEach(d => { if (nxb.find(x=>x.id===d.id).bal > 0.5) debtRow(np, PN, d, namt[d.id]||0); });
-  if (nOne) nrow("Bills due before the one after", "−" + $$(nOne), m.oneoffs.filter(o => !o.inc && o.a && o.due && inPer(o.due, PN)).map(o=>o.n).join(", "));
-  nrow("Bills + spending budget", "−" + $$(Math.round(billsPerPay() + budgetTotal())));
-  nrow(nsave >= 0 ? "To savings" : "Short by", $$(Math.abs(Math.round(nsave))), null, "total");
+  planRows(np, PN, namt, nxb, false);
+  prow(np, nsave >= 0 ? "To savings" : "Short by", $$(Math.abs(Math.round(nsave))), null, "total");
   const al = $("mAlerts"); al.innerHTML = "";
   m.debts.forEach(d => {
     const sb = plan.startBals.find(x=>x.id===d.id); if (!d.limit || sb.bal <= d.limit) return;
     const after = sb.bal - (plan.amt[d.id]||0);
     if ((+d.bal||0) <= d.limit) al.appendChild(mk("div","alert ok", d.n + " is back under its limit. Keep the card unused until it's paid off."));
     else if (after <= d.limit) al.appendChild(mk("div","alert", d.n + " is " + $$(sb.bal - d.limit) + " over its " + $$(d.limit) + " limit. This paycheque's " + $$(plan.amt[d.id]) + " gets it back under. Don't use this card."));
-    else al.appendChild(mk("div","alert", d.n + " will still be " + $$(Math.round(after - d.limit)) + " over its limit after this payment. That can mean an over-limit fee and a hit to your credit for another 2 weeks. Pay at least " + $$(Math.ceil(sb.bal - d.limit)) + " if you can, or call RBC and tell them your plan."));
+    else al.appendChild(mk("div","alert", d.n + " will still be " + $$(Math.round(after - d.limit)) + " over its limit after this payment. That can mean an over-limit fee and a hit to your credit for another 2 weeks. Pay at least " + $$(Math.ceil(sb.bal - d.limit)) + " if you can, or call the bank and tell them your plan."));
   });
-  if (plan.save < 0) al.appendChild(mk("div","alert","This plan spends more than your paycheque. Lower a budget or a debt payment in Setup."));
+  m.debts.forEach(d => {
+    const sb = plan.startBals.find(x=>x.id===d.id); if (!(+d.min > 0) || sb.bal <= 0.5 || paidThisPer(P, d.id) > 0) return;
+    const a = plan.amt[d.id]||0, mn = Math.min(+d.min, sb.bal);
+    if (a < mn - 0.5) al.appendChild(mk("div","alert", d.n + " is set to " + $$(Math.round(a)) + ", under its " + $$(mn) + " minimum payment. If this month's minimum isn't paid yet, pay at least " + $$(mn) + " before the due date. A missed minimum means a late fee and a mark on your credit."));
+  });
+  const gp = $("mGap"); gp.innerHTML = "";
+  if (plan.save < -0.5){
+    const gap = Math.ceil(-plan.save);
+    const room = []; let roomT = 0;
+    m.debts.slice().reverse().forEach(d => {
+      if (paidThisPer(P, d.id) > 0) return;
+      const sb = plan.startBals.find(x=>x.id===d.id), mn = Math.min(+d.min||0, Math.max(0, sb.bal));
+      const r = Math.max(0, Math.floor((plan.amt[d.id]||0) - mn)); if (r > 0){ room.push({d, r}); roomT += r; }
+    });
+    const c = mk("div","dcard gapcard"); c.style.marginTop = "10px";
+    const top = mk("div","top"); top.append(mk("span",null,"Short by " + $$(gap)), mk("b",null,"")); c.appendChild(top);
+    c.appendChild(mk("p",null,"The plan sends out more than comes in. Cover it with any of these:"));
+    const ul = mk("ul");
+    ul.appendChild(mk("li",null,"Money already in your account: type it in “Already in your account” above."));
+    if (roomT > 0) ul.appendChild(mk("li",null,"Pay less on debts this time: " + $$(roomT) + " of your debt payments is above the minimums (" + room.map(x => x.d.n.replace(" credit card","") + " " + $$(x.r)).join(", ") + ")."));
+    ul.appendChild(mk("li",null,"Lower this paycheque's spending budget: tap the number next to Spending budget."));
+    ul.appendChild(mk("li",null,"Bills: if some won't come out until next paycheque, type what really comes out."));
+    c.appendChild(ul);
+    if (roomT > 0){
+      const take = Math.min(gap, roomT);
+      const b = mk("button","btn", "Take " + $$(take) + " from debt payments"); b.style.marginTop = "6px";
+      b.onclick = () => { let need = take; m.over[P.key] = m.over[P.key] || {};
+        room.forEach(({d, r}) => { if (need <= 0) return; const x = Math.min(r, need); m.over[P.key][d.id] = Math.round((plan.amt[d.id]||0) - x); need -= x; });
+        save(); renderMoney(); };
+      c.appendChild(b);
+      c.appendChild(mk("p",null,"Takes from Friends first (no interest), then Scotia, then RBC, and never below a minimum. You can still change each number."));
+    }
+    gp.appendChild(c);
+  }
 
   // ---- payday checklist
   const ch = $("mChecks"); ch.innerHTML = "";
@@ -1490,7 +1795,7 @@ function renderMoney(){
   const oo = $("mOneoffs"); oo.innerHTML = "";
   m.oneoffs.forEach(o => {
     const sub = (o.a ? (o.inc ? "+" : "−") + $$(o.a) : "Amount unknown, set it in Setup") + (o.due ? " · due " + dOf(o.due).toLocaleDateString(undefined,{month:"short",day:"numeric"}) : "") + (o.inc ? " · put it toward debt" : (o.a && o.due ? " · taken from the paycheque before it" : ""));
-    const r = checkRowM(o.n, sub, o.done, on => { o.done = on; save(); renderMoney(); });
+    const r = checkRowM(o.n, sub, o.done, on => { o.done = on; if (on){ if (o.inc) o.got = key(t); else o.paidOn = key(t); } else { delete o.got; delete o.paidOn; } save(); renderMoney(); });
     const x = mk("button","x","×"); x.setAttribute("aria-label","Remove " + o.n);
     x.onclick = e => { e.preventDefault(); m.oneoffs.splice(m.oneoffs.indexOf(o),1); save(); renderMoney(); };
     r.appendChild(x); oo.appendChild(r);
@@ -1498,28 +1803,22 @@ function renderMoney(){
   if (!m.oneoffs.length) oo.appendChild(mk("div","empty","Nothing coming up. Add bills or refunds you know about."));
 
   renderBills();
+  renderActual();
   // ---- spend
   const cats = $("mCats"); cats.innerHTML = "";
-  MCATS.forEach(c => { const b = mk("button", null, c.n); b.setAttribute("aria-pressed", c.id===mCat); b.onclick = () => { mCat = c.id; renderMoney(); }; cats.appendChild(b); });
+  MCATS.concat([SURPRISE]).forEach(c => { const b = mk("button", null, c.n); b.setAttribute("aria-pressed", c.id===mCat); b.onclick = () => { mCat = c.id; renderMoney(); }; cats.appendChild(b); });
+  $("mCatHint").textContent = mCat === "surprise" ? "For costs you didn't plan for, like a wifi bill or a repair. They don't come out of your spending budget. They show on the Payday plan instead, so you can lower a debt payment to cover them." : "";
   const bb = $("mBud"); bb.innerHTML = "";
   MCATS.forEach(c => {
-    const s = spentPer.filter(x=>x.cat===c.id).reduce((a,x)=>a+x.amt,0), b = +m.budgets[c.id]||0;
+    const s = spentPer.filter(x=>x.cat===c.id).reduce((a,x)=>a+x.amt,0), b = Math.round((+m.budgets[c.id]||0)*rB);
     const r = mk("div","row"); r.append(mk("span",null,c.n), mk("span",null,$$(s) + " of " + $$(b)));
     const bar = mk("div","bar"), i = mk("i"); i.style.width = Math.min(100, b ? s/b*100 : (s?100:0)) + "%"; if (s > b) i.className = "over"; bar.appendChild(i);
     bb.append(r, bar);
   });
-  const wh = $("mWhere"); wh.innerHTML = "";
-  const paidDebt = m.pays.filter(x => x.per===P.key).reduce((a,x)=>a+x.amt,0);
-  const saved = m.deps.filter(x => x.per===P.key).reduce((a,x)=>a+x.amt,0);
-  const parts = [["Debt payments", paidDebt], ["Bills", billsPerPay()], ["Savings", saved]].concat(MCATS.map(c => [c.n, spentPer.filter(x=>x.cat===c.id).reduce((a,x)=>a+x.amt,0)]));
-  const pay = +m.pay || 1;
-  parts.forEach(([n,v]) => { const r = mk("div","row"); r.append(mk("span",null,n), mk("span",null,$$(Math.round(v)) + " · " + Math.round(v/pay*100) + "%")); const bar = mk("div","bar"), i = mk("i"); i.style.width = Math.min(100, v/pay*100) + "%"; bar.appendChild(i); wh.append(r, bar); });
-  const rest = pay - parts.reduce((a,p)=>a+p[1],0);
-  wh.appendChild(mk("p","muted", "Not used yet: " + $$(Math.round(rest)) + (paidDebt ? "" : " (debt payments show once you tick them on Payday)")));
   const lg = $("mLog"); lg.innerHTML = "";
   if (!spentPer.length) lg.appendChild(mk("div","empty","Nothing logged this pay period. Pick a category, type the amount, tap Add."));
   spentPer.slice().sort((a,b)=>b.d.localeCompare(a.d)).forEach(x => {
-    const r = mk("div","ent"); r.append(mk("span",null,(MCATS.find(c=>c.id===x.cat)||{n:x.cat}).n + (x.note ? ": " + x.note : "")), mk("em",null, dOf(x.d).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " · " + $$(x.amt)));
+    const r = mk("div","ent"); r.append(mk("span",null,catName(x.cat) + (x.note ? ": " + x.note : "")), mk("em",null, dOf(x.d).toLocaleDateString(undefined,{month:"short",day:"numeric"}) + " · " + $$(x.amt)));
     const del = mk("button","x","×"); del.setAttribute("aria-label","Remove"); del.onclick = () => { m.spend.splice(m.spend.indexOf(x),1); save(); renderMoney(); };
     r.appendChild(del); lg.appendChild(r);
   });
@@ -1527,8 +1826,8 @@ function renderMoney(){
   const pers = []; for (let i=1;i<=4;i++){ const d = new Date(P.s); d.setDate(d.getDate()-14*i); const Q = period(d); if (m.spend.some(x=>inPer(x.d,Q))) pers.push(Q); }
   if (!pers.length) av.appendChild(mk("div","mrow","Shows up after your first full pay period of logging."));
   else MCATS.concat([{id:"_all", n:"Total spending"}]).forEach(c => {
-    const tot = pers.reduce((a,Q)=>a+m.spend.filter(x=>inPer(x.d,Q) && (c.id==="_all" || x.cat===c.id)).reduce((s,x)=>s+x.amt,0),0) / pers.length;
-    const b = c.id==="_all" ? bud : (+m.budgets[c.id]||0);
+    const tot = pers.reduce((a,Q)=>a+m.spend.filter(x=>inPer(x.d,Q) && (c.id==="_all" ? x.cat!=="surprise" : x.cat===c.id)).reduce((s,x)=>s+x.amt,0),0) / pers.length;
+    const b = c.id==="_all" ? budgetTotal() : (+m.budgets[c.id]||0);
     const r = mk("div","mrow" + (c.id==="_all"?" total":"")); const l = mk("span",null,c.n); l.appendChild(mk("small",null,"Budget " + $$(b))); r.append(l, mk("b",null,$$(Math.round(tot)))); if (tot > b) r.querySelector("b").style.color = "var(--danger)"; av.appendChild(r);
   });
 
@@ -1685,10 +1984,16 @@ function showTab(name){
 
 // events
 document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => showTab(b.dataset.tab));
-document.querySelectorAll("#mSub button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("#mSub button").forEach(x => x.setAttribute("aria-pressed", x===b));
-  ["pay","spend","bills","debt","save","set"].forEach(v => $("mv-"+v).hidden = v !== b.dataset.mv);
-});
+function showMv(v){
+  document.querySelectorAll("#mSub button").forEach(x => x.setAttribute("aria-pressed", x.dataset.mv===v));
+  ["pay","act","spend","bills","debt","save","set"].forEach(k => $("mv-"+k).hidden = k !== v);
+  if (v === "act") renderActual();
+}
+document.querySelectorAll("#mSub button").forEach(b => b.onclick = () => showMv(b.dataset.mv));
+$("toAct").onclick = () => { aOff = 0; showMv("act"); window.scrollTo(0, $("tab-money").offsetTop); };
+$("toAct2").onclick = () => { aOff = 0; showMv("act"); window.scrollTo(0, $("tab-money").offsetTop); };
+$("aPrev").onclick = () => { aOff--; renderActual(); };
+$("aNext").onclick = () => { if (aOff < 0){ aOff++; renderActual(); } };
 document.querySelectorAll("#tab-goals .subtabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#tab-goals .subtabs button").forEach(x => x.setAttribute("aria-pressed", x===b));
   ["list","time","fit"].forEach(v => $("gv-"+v).hidden = v !== b.dataset.gv);
