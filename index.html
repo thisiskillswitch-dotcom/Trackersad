@@ -139,6 +139,8 @@ h3{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:18px;marg
 .focuscard b{display:block;font-family:"Barlow Condensed",sans-serif;font-size:24px;font-weight:600;color:var(--kit);line-height:1.15;margin:2px 0}
 .nextup{font-size:14px;color:var(--muted);margin:10px 2px 0}
 .nextup strong{color:var(--ink)}
+.tip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--kit);border-radius:10px;padding:10px 12px;font-size:14px;margin:14px 0 0}
+.tip b{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:15px;display:block;color:var(--muted)}
 .prog{display:flex;align-items:center;gap:10px}
 .prog .bar{flex:1;margin:6px 0}
 .prog em{font-style:normal;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;min-width:42px;text-align:right}
@@ -162,7 +164,8 @@ details.goal .item{border-top:1px solid var(--line)}
 .phase h3 small{font-family:Barlow,sans-serif;font-weight:400;font-size:13px;color:var(--muted);margin-left:6px}
 .phase ul{margin:4px 0 0;padding-left:18px;font-size:15px}
 .subtabs{display:flex;gap:6px;margin-top:16px}
-.subtabs button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 0;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;color:var(--muted);cursor:pointer;min-height:44px}
+.subtabs button{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 2px;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:16px;color:var(--muted);cursor:pointer;min-height:44px}
+#tab-goals .subtabs button{font-size:15px}
 .subtabs button[aria-pressed="true"]{background:var(--pitch);color:#F3F5EF;border-color:var(--pitch)}
 .verdict{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--slate);border-radius:12px;padding:12px 14px}
 .verdict.good{border-left-color:var(--pitch2)}
@@ -267,6 +270,43 @@ details.goal .item{border-top:1px solid var(--line)}
 #todoList:empty{display:none}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* ---- polish v12 ---- */
+:root{--shadow:0 1px 2px rgba(20,56,43,.05),0 6px 18px rgba(20,56,43,.06);--r:14px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--shadow:0 1px 0 rgba(255,255,255,.03)} }
+:root[data-theme="dark"]{--shadow:0 1px 0 rgba(255,255,255,.03)}
+body{-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.board{background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch2) 100%);border-radius:0 0 22px 22px;padding:20px 20px 18px;box-shadow:0 8px 24px rgba(20,56,43,.18)}
+.score .big{letter-spacing:-.01em}
+.hbar{position:relative;z-index:1;height:6px;border-radius:3px;background:rgba(243,245,239,.14);margin-top:14px;overflow:hidden}
+.hbar i{display:block;height:100%;width:0;background:var(--kit);border-radius:3px;transition:width .4s cubic-bezier(.2,.8,.2,1)}
+.session{display:inline-block;margin-top:10px;background:rgba(243,245,239,.1);border-radius:999px;padding:5px 12px;font-size:13px}
+h2{letter-spacing:.01em;margin:26px 2px 10px}
+.group,.plan,.log,.meter,.num,.stat,.chart,details.goal,.trend,.hist,.mrows,.dcard,.setgrp,.bud,.cmp,.ecard,.verdict,.alert,.vgrid div,.tip,.quick button,.day{box-shadow:var(--shadow)}
+.group,.plan,.log,.meter,.num,.stat,.chart,details.goal,.trend,.hist,.mrows,.dcard,.setgrp,.bud,.cmp,.ecard,.verdict,.alert,.vgrid div{border-radius:var(--r)}
+.item{transition:background .15s}
+.item:active{background:var(--grass)}
+.box{border-radius:7px;transition:background .15s,border-color .15s,transform .18s cubic-bezier(.3,1.6,.5,1)}
+.item input:checked + .box{transform:scale(1.08)}
+.item.done .txt span{opacity:.75}
+.btn{border-radius:10px;transition:transform .1s,filter .15s}
+.btn:active,.quick button:active,.subtabs button:active,.chips button:active{transform:scale(.97)}
+.quick button{border-radius:12px;transition:transform .1s,background .15s}
+.subtabs{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;box-shadow:var(--shadow)}
+.subtabs button{border:0;border-radius:9px;background:transparent;transition:background .2s,color .2s}
+.focuscard{background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch2) 100%);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden;box-shadow:0 8px 22px rgba(20,56,43,.16)}
+.focuscard::after{content:"";position:absolute;right:-40px;bottom:-50px;width:130px;height:130px;border:2px solid rgba(243,245,239,.12);border-radius:50%}
+.mcard{border-radius:16px;background:linear-gradient(160deg,var(--pitch) 0%,var(--pitch2) 100%)}
+.tip{border-left-width:4px;border-radius:12px}
+.bar{border-radius:6px}
+.tabs{background:color-mix(in srgb,var(--card) 88%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
+.tabs button{border-top:0;position:relative;transition:color .2s}
+.tabs button::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--kit);transform:scaleX(0);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.tabs button[aria-selected="true"]::before{transform:scaleX(1)}
+section:not([hidden]){animation:fadeUp .25s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.custom input,.mform input,.mform select,.tdwhen input,#tdText{border-radius:10px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
@@ -281,6 +321,7 @@ details.goal .item{border-top:1px solid var(--line)}
       <div class="big" id="scoreBig">0<small>/0</small></div>
       <div class="side" id="scoreSide"></div>
     </div>
+    <div class="hbar" aria-hidden="true"><i id="hBar"></i></div>
     <div class="session" id="session"></div>
   </header>
 
@@ -297,6 +338,7 @@ details.goal .item{border-top:1px solid var(--line)}
       <button data-w="1" aria-pressed="false">Tomorrow</button>
       <label>or <input type="date" id="tdDate" aria-label="Pick a date"></label>
     </div>
+    <p class="tip" id="tipLine"></p>
     <div id="checklist"></div>
     <h2>Numbers</h2>
     <div class="nums">
@@ -369,7 +411,8 @@ details.goal .item{border-top:1px solid var(--line)}
     <div class="subtabs" role="group" aria-label="Goals view">
       <button data-gv="list" aria-pressed="true">Goals</button>
       <button data-gv="time" aria-pressed="false">Timeline</button>
-      <button data-gv="fit" aria-pressed="false">How it fits</button>
+      <button data-gv="fit" aria-pressed="false">Week</button>
+      <button data-gv="mind" aria-pressed="false">Remember</button>
     </div>
     <div id="gv-list">
       <h2>All goals</h2>
@@ -385,27 +428,83 @@ details.goal .item{border-top:1px solid var(--line)}
       <div id="pEditTools"></div>
     </div>
     <div id="gv-fit" hidden>
-      <h2>Where it goes in your day</h2>
+      <h2>Your week</h2>
       <div class="plan">
         <dl class="sched">
-          <dt>Ride</dt><dd>15 min English reading</dd>
-          <dt>Lunch</dt><dd>20 min learning, 2–3 days (tutorials or theory)</dd>
-          <dt>Work</dt><dd>Write your own emails first. AI only checks them.</dd>
-          <dt>8:00</dt><dd>Tue + Thu: 1 h focus block (SolidWorks, Ansys, MATLAB). Other nights: rest.</dd>
-          <dt>Sat</dt><dd>Main 2–3 h block. Travel weekend: videos and reading only.</dd>
-          <dt>Sun</dt><dd>Weigh-in, waist, 10 min weekly review</dd>
+          <dt>Mon</dt><dd>Gym: full body + 10–15 min Zone 2. Evening free.</dd>
+          <dt>Tue</dt><dd>No gym. <b>CSWA 6:30–8:30</b> at Klohn Commons (UNB Saint John, free with your UNB card). Backup: Bubbly Cup (open until 9, buy a drink).</dd>
+          <dt>Wed</dt><dd>Gym: full body + 10–15 min Zone 2. Evening free.</dd>
+          <dt>Thu</dt><dd>No gym. <b>Pendulum 6:00–8:00</b> at the Market Square library (closes at 8).</dd>
+          <dt>Fri</dt><dd>Gym: full body + intervals. Evening free. Write the work log.</dd>
+          <dt>Sat</dt><dd><b>Market Square library 10:00–12:30:</b> 1.5 h CSWA, 1 h pendulum. Then 30–45 min Zone 2 or soccer, rest of the day free.</dd>
+          <dt>Away</dt><dd>Travel weekend: no study, no guilt. Walking around counts as cardio.</dd>
+          <dt>Sun</dt><dd>Groceries, 45 min food prep, weigh-in, 10 min weekly review, rest.</dd>
         </dl>
-        <p class="muted">These show up in your Today checklist under "Growth" on the right days.</p>
+        <p class="muted">About 6.5 h of study a week: CSWA ~3.5 h, pendulum ~3 h. These show up in your Today checklist under "Growth" on the right days.</p>
+      </div>
+      <h2>Every night</h2>
+      <div class="plan">
+        <dl class="sched">
+          <dt>7:45</dt><dd>Dinner + phone and chill time (study nights: eat at 5:45 first)</dd>
+          <dt>9:15</dt><dd>Pack tomorrow's lunch, shower</dd>
+          <dt>9:30</dt><dd>Call</dd>
+          <dt>10:15</dt><dd>Chill or phone time, skincare</dd>
+          <dt>10:45</dt><dd>Phone away</dd>
+          <dt>11:00</dt><dd>Sleep</dd>
+        </dl>
       </div>
       <h2>Rules</h2>
       <div class="plan"><ul>
-        <li><b>One main thing at a time:</b> CSWA, then Ansys, then the pendulum.</li>
-        <li><b>5–6 hours a week</b> during co-op terms. Skipped a block? Move it once, don't stack it.</li>
+        <li><b>No study at work, at lunch or on the ride.</b> Evenings and Saturdays only.</li>
+        <li><b>Until February, only four things:</b> CSWA, the pendulum, your resume and debt. Everything else waits.</li>
+        <li><b>Missed a block?</b> Move it once, don't stack two in one night.</li>
+        <li><b>At least 1 hour of chill time every night.</b> Gym nights are free nights.</li>
         <li><b>School wins in study terms.</b> Pause the project during exams.</li>
         <li><b>One project, four goals:</b> the pendulum is your portfolio, research, conference talk and presentation practice.</li>
         <li><b>Cut first if busy:</b> CSWP, double-pendulum hardware, part-time job if a scholarship comes through.</li>
-        <li><b>Protect two weekend mornings a month</b> on travel-heavy months.</li>
       </ul></div>
+    </div>
+    <div id="gv-mind" hidden>
+      <h2>Direction</h2>
+      <div class="plan">
+        <p><b>Energy now, space after.</b> You don't have to pick yet. Both want thermofluids, controls, FEA and a strict documentation culture.</p>
+        <ul>
+          <li><b>IFS counts toward nuclear:</b> P&amp;IDs, conformity statements, RFPs and schedule control are how nuclear projects run. Say it that way on your resume.</li>
+          <li><b>The pendulum counts toward space:</b> balancing an unstable system with LQR is how attitude control and robotic arms work.</li>
+        </ul>
+      </div>
+      <h2>What matters most</h2>
+      <div class="plan"><ol style="padding-left:20px;margin:8px 0">
+        <li><b>Summer 2027 co-op in energy.</b> Apply Jan – Feb. Resume ready by Dec 15.</li>
+        <li><b>GPA from Sept 2027.</b> The biggest gate for CSA and nuclear. The pendulum math is ME 3611 + ME 3622 prep.</li>
+        <li><b>The pendulum, documented.</b> GitHub repo, video, short write-up.</li>
+        <li><b>IFS work + Jennifer's reference.</b> Speak up in meetings, do good work.</li>
+      </ol></div>
+      <h2>Smaller than it feels</h2>
+      <div class="plan"><ul>
+        <li><b>CSWA:</b> quick win. Do it and move on.</li>
+        <li><b>Ansys certificate:</b> real FEA in the project matters more.</li>
+        <li><b>Research + conference:</b> a 2028 goal, not now.</li>
+      </ul></div>
+      <h2>Keep doing</h2>
+      <div class="plan"><ul>
+        <li><b>Work log every Friday:</b> 3 lines on what you did, tools, results. Ask Engineers and Geoscientists NB if co-op time counts toward experience.</li>
+        <li><b>5 STAR stories from IFS:</b> conformity statements, schedule updates, contractors, a mistake you fixed, initiative.</li>
+        <li><b>One coffee chat or LinkedIn message a month</b> with someone at NB Power, Moltex, OPG, later MDA.</li>
+        <li><b>LinkedIn</b> up to date with real IFS detail.</li>
+        <li><b>Written evaluation from Jennifer</b> at the end of each term, plus permission to use her as a reference.</li>
+        <li><b>French:</b> 10 min of Duolingo a day. The CSA is in Quebec and federal jobs favour bilingual people.</li>
+        <li><b>Python</b> for the pendulum simulations, posted on GitHub.</li>
+        <li><b>Societies:</b> Canadian Nuclear Society, CASI, SEDS Canada.</li>
+        <li><b>Scholarships:</b> CNS, CASI and energy companies, not just UNB.</li>
+        <li><b>Student team</b> back on campus: rocketry, satellite, robotics or SEDS.</li>
+        <li><b>Grad school stays open:</b> a master's in controls or nuclear is a common route into CSA and nuclear R&amp;D.</li>
+      </ul></div>
+      <h2>Targets</h2>
+      <div class="plan">
+        <p><b>Energy:</b> Point Lepreau (NB Power), Moltex (Saint John), OPG, Bruce Power, Kinectrics.</p>
+        <p><b>Space:</b> MDA Space, Magellan Aerospace, Honeywell Aerospace, Pratt &amp; Whitney Canada, CSA student jobs (FSWEP). After graduating: the CSA Engineer Development Program.</p>
+      </div>
     </div>
   </section>
 
@@ -526,30 +625,67 @@ details.goal .item{border-top:1px solid var(--line)}
     <div class="plan">
       <dl class="sched">
         <dt>6:30</dt><dd>Wake, water, rinse, moisturizer, sunscreen</dd>
-        <dt>7:20</dt><dd>Ride to work</dd>
-        <dt>~3:45</dt><dd>Snack on last break</dd>
-        <dt>5:30</dt><dd>Home, grab gym bag, bus (podcast or audiobook)</dd>
-        <dt>6:00</dt><dd>Gym, 60–75 min</dd>
+        <dt>7:20</dt><dd>Ride to work. Music or podcast, no study.</dd>
+        <dt>8–5</dt><dd>Work. Lunch around 12, snack on the last break (~3:45). No study.</dd>
+        <dt>5:30</dt><dd>Home</dd>
+      </dl>
+      <h3>Gym nights (Mon, Wed, Fri)</h3>
+      <dl class="sched">
+        <dt>5:40</dt><dd>Grab gym bag, bus (podcast or audiobook)</dd>
+        <dt>6:00</dt><dd>Gym 60–75 min, then cardio</dd>
         <dt>7:15</dt><dd>Vega shake on the bus home</dd>
-        <dt>7:45</dt><dd>Reheat prepped dinner</dd>
-        <dt>8:00</dt><dd>Tue + Thu: 1 h focus block (see Goals)</dd>
-        <dt>8:30</dt><dd>Free time</dd>
-        <dt>10:15</dt><dd>Shower, skincare, pack tomorrow's bag, phone away</dd>
+        <dt>7:45</dt><dd>Reheat prepped dinner, phone and chill time</dd>
+      </dl>
+      <h3>Study nights (Tue, Thu)</h3>
+      <dl class="sched">
+        <dt>5:45</dt><dd>Dinner</dd>
+        <dt>6:15</dt><dd>Head out. Tue: Klohn Commons. Thu: Market Square library.</dd>
+        <dt>6:30</dt><dd>Study 2 h with a 10 min break (Thu 6:00–8:00, library closes at 8)</dd>
+        <dt>8:45</dt><dd>Home, chill time</dd>
+      </dl>
+      <h3>Every night</h3>
+      <dl class="sched">
+        <dt>9:15</dt><dd>Pack tomorrow's lunch and bag, shower</dd>
+        <dt>9:30</dt><dd>Call</dd>
+        <dt>10:15</dt><dd>Chill or phone time, skincare</dd>
+        <dt>10:45</dt><dd>Phone away from the bed</dd>
         <dt>11:00</dt><dd>Sleep</dd>
       </dl>
     </div>
-    <h2>Training</h2>
+    <h2>Training: full body Mon, Wed, Fri</h2>
+    <div class="plan">
+      <p>Same session each day, 60–70 min. After a warm-up set or two, do <b>1 hard working set</b> (to failure or 1 rep short). ×2 means two sets.</p>
+      <ol style="padding-left:22px;margin:6px 0">
+        <li>Squat pattern (leg press or hack squat)</li>
+        <li>RDL or hyperextension</li>
+        <li>Upper chest press (incline DB or machine)</li>
+        <li>Row, elbows out (upper back)</li>
+        <li>Lat pulldown</li>
+        <li>Row, elbows in (lats)</li>
+        <li>Shoulder press</li>
+        <li>Lateral raises ×2</li>
+        <li>Pec deck</li>
+        <li>Dips or JM press</li>
+        <li>Tricep extension</li>
+        <li>Curls ×2</li>
+        <li>Leg extension</li>
+        <li>Hamstring curl</li>
+        <li>Adductor machine</li>
+        <li>Hip thrust or abductor machine</li>
+        <li>Calf press ×2</li>
+      </ol>
+      <p class="muted">Optional if there's time: cable wrist curls, wrist extensions, cable crunch. Rotate the variation in a slot every couple of weeks. Stalling? Add a second set to the lagging muscle before adding a gym day.</p>
+      <p class="muted">Left lat: only back moves that feel pain-free. Lighter weight and slow reps on pulldowns and rows. If it still feels off, see your physio.</p>
+    </div>
+    <h2>Cardio</h2>
     <div class="plan">
       <ul>
-        <li><b>Mon, upper A:</b> incline DB press, bench, lat pulldown, chest-supported row, lateral raises, hammer curls, cable pushdown, neck curls/extensions (optional)</li>
-        <li><b>Tue, lower A:</b> squat or leg press, RDLs, leg extensions, lunges, calf raises, planks or hanging leg raises</li>
-        <li><b>Wed, conditioning:</b> warm up 5 min, then 10 rounds of 30 s hard / 60 s easy on the bike or treadmill. Or play soccer.</li>
-        <li><b>Thu, upper B:</b> overhead press, incline bench, cable or DB pullover, cable rows, lateral raises, shrugs, preacher curls, overhead cable extensions</li>
-        <li><b>Fri, lower B + sprints:</b> leg press, leg extensions, hamstring curls, step-ups, then 6–8 sprints of about 10 s at 80–90% effort, walking 60–90 s between</li>
-        <li><b>Weekend:</b> rest, walks, soccer, Sunday prep</li>
+        <li><b>Every day:</b> 8–10k steps. Does more for fat loss than any session.</li>
+        <li><b>Mon + Wed:</b> 10–15 min Zone 2 after lifting (incline walk or bike, can still talk).</li>
+        <li><b>Fri:</b> intervals after lifting, 6–8 × 20–30 s hard, 60–90 s easy.</li>
+        <li><b>Weekend:</b> 30–45 min Zone 2: brisk walk, bike, or soccer.</li>
       </ul>
-      <p class="muted">3–4 sets of 6–12. Keep the weights heavy while the scale drops.</p>
-      <p class="muted">Left lat: only do back moves that feel pain-free. Lighter weight and slow reps on pulldowns and pullovers. If it still feels off, see a physio.</p>
+      <p class="muted">Never before lifting. No hard cardio on Tue or Thu. Weight stalled 2 weeks? Add 1,000–2,000 daily steps first.</p>
     </div>
     <h2>Sunday prep</h2>
     <div class="plan">
@@ -603,7 +739,23 @@ details.goal .item{border-top:1px solid var(--line)}
 
 <script>
 (function(){
-const WORKOUTS = {1:"Upper A",2:"Lower A",3:"Conditioning",4:"Upper B",5:"Lower B",6:"Rest or soccer",0:"Rest + Sunday prep"};
+const WORKOUTS = {1:"Full body + 10–15 min Zone 2",2:"No gym · CSWA night",3:"Full body + 10–15 min Zone 2",4:"No gym · pendulum night",5:"Full body + intervals",6:"30–45 min Zone 2 or soccer",0:"Rest + Sunday prep"};
+const TIPS = [
+  "Summer 2027 co-op is the biggest career step. Resume ready by Dec 15, apply Jan – Feb, energy first.",
+  "Your GPA from Sept 2027 is the biggest gate for CSA and nuclear. The pendulum math is ME 3611 + ME 3622 prep.",
+  "Document the pendulum as you go: GitHub repo, video, short write-up.",
+  "IFS counts toward nuclear: P&IDs, conformity statements, RFPs and schedule control. Say it that way.",
+  "One coffee chat or LinkedIn message a month: NB Power, Moltex, OPG, later MDA.",
+  "Friday: 3 lines in your work log. Your resume and interviews come from it.",
+  "Write your 5 STAR stories from IFS before applications open.",
+  "Until February: CSWA, the pendulum, your resume and debt. Everything else waits.",
+  "CSWA is a quick win. The Ansys certificate matters less than real FEA in your project.",
+  "10 min of French a day. The CSA is in Quebec and federal jobs favour bilingual people.",
+  "Ask Jennifer for a written evaluation at the end of each term.",
+  "Join the Canadian Nuclear Society and CASI as a student. Conferences, scholarships, people.",
+  "Missed a study block? Move it once. Don't stack two in one night.",
+  "No study at work, at lunch or on the ride. Evenings and Saturdays only."
+];
 const FOODS = [
   {g:"Protein", n:"Egg (1 medium)", c:65, p:5.5},
   {g:"Protein", n:"Costco chicken breast (130 g)", c:155, p:28.5},
@@ -642,8 +794,10 @@ function items(dateObj){
     {g:"Day", id:"lunch", t:"Prepped lunch"},
     {g:"Day", id:"snack", t:"Afternoon snack", s:"Before the gym, not after"},
     {g:"Day", id:"stepsok", t:"8–10k steps"},
-    {g:"Training", id:"gym", t: WORKOUTS[d], s: weekday ? "60–75 min" : "Optional"},
-    ...(d===5 ? [{g:"Training", id:"sprints", t:"Sprints", s:"6–8 × 10 s at 80–90%, walk 60–90 s between"}] : []),
+    ...(d===1||d===3||d===5 ? [{g:"Training", id:"gym", t:"Full body", s:"60–75 min. 1 hard set each after warm-ups"}] : []),
+    ...(d===1||d===3 ? [{g:"Training", id:"z2", t:"10–15 min Zone 2 after lifting", s:"Incline walk or bike, can still talk"}] : []),
+    ...(d===5 ? [{g:"Training", id:"intervals", t:"Intervals after lifting", s:"6–8 × 20–30 s hard, 60–90 s easy"}] : []),
+    ...(d===6 ? [{g:"Training", id:"z2long", t:"30–45 min Zone 2 or soccer", s:"Brisk walk counts. Skip on travel weekends"}] : []),
     {g:"Evening", id:"dinner", t:"Prepped dinner, no takeout"},
     {g:"Evening", id:"protein", t:"Hit protein (150 g)"},
     {g:"Evening", id:"spendlog", t:"Logged today's spending", s:"Money tab, Spend"},
@@ -654,14 +808,12 @@ function items(dateObj){
     {g:"Night", id:"bed", t:"In bed by 11", s:"Ticks itself when you log bed time"}
   ];
   const growth = [];
-  if (weekday){
-    growth.push({g:"Growth", id:"read", t:"15 min English reading", s:"On the ride to work"});
-    growth.push({g:"Growth", id:"lunchlearn", t:"20 min learning at lunch", s:"Current focus: " + currentFocus().t});
-    growth.push({g:"Growth", id:"ownemail", t:"Wrote my own emails first", s:"AI only checks them"});
-  }
-  if (d===2 || d===4) growth.push({g:"Growth", id:"learn", t:"Focus block, 8:00–9:00", s:"Hands-on: " + currentFocus().t});
-  if (d===6) growth.push({g:"Growth", id:"mainblock", t:"Main 2–3 h block", s:"Travel weekend? Videos and reading only"});
-  if (d===0) growth.push({g:"Growth", id:"review", t:"10 min weekly review", s:"What got done, what slipped, next week's focus"});
+  if (weekday) growth.push({g:"Growth", id:"ownemail", t:"Wrote my own emails first", s:"AI only checks them"});
+  if (d===2) growth.push({g:"Growth", id:"study", t:"CSWA, 6:30–8:30", s:"Klohn Commons. Next: " + nextStep("cswa")});
+  if (d===4) growth.push({g:"Growth", id:"study", t:"Pendulum, 6:00–8:00", s:"Market Square library. Next: " + nextStep("pend")});
+  if (d===5) growth.push({g:"Growth", id:"worklog", t:"Work log: 3 lines on this week at IFS", s:"What you did, tools, results"});
+  if (d===6) growth.push({g:"Growth", id:"mainblock", t:"Library 10:00–12:30", s:"1.5 h CSWA, 1 h pendulum. Travel weekend: skip it, no guilt"});
+  if (d===0) growth.push({g:"Growth", id:"review", t:"10 min weekly review", s:"Read Goals → Remember. What slipped, next week's plan"});
   const ni = list.findIndex(i => i.g==="Night");
   list.splice(ni, 0, ...growth);
   if (d===1 || d===4) list.splice(list.findIndex(i=>i.id==="skinpm")+1,0,{g:"Night", id:"adapalene", t:"Adapalene", s:"Over moisturizer, pea-sized"});
@@ -669,107 +821,167 @@ function items(dateObj){
   return list;
 }
 
-const DEFAULT_PLAN = {v:2,
+const clone = o => JSON.parse(JSON.stringify(o));
+const DEFAULT_PLAN = {v:3,
  goals:[
- {area:"School and money", id:"gpa", title:"4.3 GPA year", when:"Sep 2027 – Apr 2028", why:"Fall 2027 + Winter 2028. At least $7,000 in UNB scholarships, and it opens every other door.", ms:[
+ {area:"Certifications", id:"cswa", title:"Official SolidWorks CSWA", when:"Exam Nov 28–29", why:"Quick resume win. Tue night + Saturday blocks. Backup date Dec 12.", ms:[
+  ["sw1","Install SolidWorks (student licence)","2026-10-20"],
+  ["sw6","Part features: revolve, sweep, loft, fillets, patterns","2026-11-01"],
+  ["sw7","Assemblies, mates and drawings","2026-11-08"],
+  ["sw2","Work through the official sample exam","2026-11-14"],
+  ["sw3","Two timed practice exams (3 h each)","2026-11-22"],
+  ["sw4","Pass the CSWA (Nov 28–29, backup Dec 12)","2026-11-29"],
+  ["sw5","Optional: CSWP","2027-08-31"]]},
+ {area:"Certifications", id:"ansys", title:"Ansys Associate certification", when:"Feb – Mar 2027", why:"Not before February. Real FEA in the pendulum project matters more than the certificate.", ms:[
+  ["an1","Install Ansys Student (not Discovery)","2027-02-01"],
+  ["an2","Finish the free learning track","2027-03-15"],
+  ["an3","Pass the Associate exam","2027-03-31"]]},
+ {area:"Project and research", id:"pend", title:"Double inverted pendulum", when:"Now – 2028", why:"Your best energy/space portfolio piece (it's how attitude control works) and prep for ME 3611 System Dynamics + ME 3622 Controls. Thu night + Saturday.", ms:[
+  ["pm1","Math: matrices, eigenvalues, eigenvectors","2026-11-05"],
+  ["pm2","Math: ODEs and systems (x' = Ax)","2026-11-15"],
+  ["pb1","Bootcamp lectures 4–6 (linearizing, stability)","2026-11-29"],
+  ["pb2","Bootcamp lectures 7–9 (controllability, pole placement)","2026-12-10"],
+  ["pb3","Bootcamp lectures 10–12 (pendulum on a cart)","2026-12-18"],
+  ["pe10","Python set up + GitHub repo for the project","2027-01-10"],
+  ["pe1","Derive single-pendulum equations","2027-01-17"],
+  ["pe2","Simulate single pendulum with LQR (Python)","2027-01-31"],
+  ["pe3","Derive + simulate the double pendulum with LQR","2027-02-14"],
+  ["pe9","Write-up + short video on GitHub","2027-02-28"],
+  ["pe4","Design the cart and parts in SolidWorks","2027-04-23"],
+  ["pe5","FEA on a bracket in Ansys","2027-04-23"],
+  ["pe6","Build and balance the single pendulum","2027-08-31"],
+  ["pe7","Stretch: double-pendulum hardware","2028-04-30"]]},
+ {area:"Project and research", id:"res", title:"Research and a conference talk", when:"2027 – 2028", why:"Like Ahmed. Turn the pendulum into research with a professor. A 2028 goal, not now.", ms:[
+  ["re1","Message Ahmed about how he did it","2026-10-31"],
+  ["re2","Shortlist 5 UNB profs (controls, robotics, energy)","2027-03-31"],
+  ["re3","Email them pitching the pendulum project","2027-04-30"],
+  ["re4","Supervisor confirmed for Fall 2027","2027-08-31"],
+  ["re5","Abstract submitted (CNS, CSME or CASI)","2028-04-30"],
+  ["re6","Present at the conference","2028-10-31"]]},
+ {area:"Career", id:"coop", title:"Summer 2027 co-op: energy first", when:"Apply Jan – Feb", why:"The most important career step right now. Lepreau, OPG, Bruce Power, Moltex, Kinectrics. Ford as backup.", ms:[
+  ["co6","Start a work log: 3 lines every Friday","2026-10-30"],
+  ["co8","LinkedIn updated with real IFS detail","2026-11-15"],
+  ["co7","5 STAR stories from IFS written","2026-11-30"],
+  ["co1","Resume and cover letter updated with IFS work","2026-12-15"],
+  ["co5","Reach out to the Ford contact through the family friend","2026-12-31"],
+  ["co2","15 applications sent (energy first)","2027-01-31"],
+  ["co3","40+ applications sent","2027-03-15"],
+  ["co4","Offer accepted","2027-04-15"]]},
+ {area:"Career", id:"path", title:"Energy now, space after", when:"2026 – 2029", why:"Energy co-op next, space co-op after (MDA, CSA, aerospace), then the CSA Engineer Development Program. See Goals → Remember.", ms:[
+  ["pa1","Join the Canadian Nuclear Society as a student","2026-11-30"],
+  ["pa2","First coffee chat or LinkedIn message (then one a month)","2026-11-30"],
+  ["pa3","Join CASI as a student, look at SEDS Canada","2027-02-28"],
+  ["pa4","Start French: Duolingo 10 min a day","2027-02-28"],
+  ["pa5","Apply for industry scholarships (CNS, CASI, energy companies)","2027-04-15"],
+  ["pa6","Join a UNB rocketry, satellite or robotics team","2027-09-30"],
+  ["pa7","Last co-op: apply to space (MDA, CSA via FSWEP, aerospace)","2028-01-31"],
+  ["pa8","After graduating: CSA Engineer Development Program","2029-06-30"]]},
+ {area:"Career", id:"ifs", title:"IFS: Fall + Winter 2027", when:"Now – Apr 2027", why:"Winter extension signed. Good work + a strong reference from Jennifer helps every application after this.", ms:[
+  ["ifs4","Winter offer signed","2026-10-14"],
+  ["ifs5","Find Saint John housing for Jan (co-op apartment ends Jan 1)","2026-12-01"],
+  ["ifs6","Ask Jennifer for a written evaluation of Fall","2026-12-18"],
+  ["ifs1","Give a short update in a team meeting","2027-03-31"],
+  ["ifs2","Ask Jennifer for a reference","2027-04-15"],
+  ["ifs3","End-of-term presentation of your work","2027-04-23"]]},
+ {area:"School and money", id:"debt", title:"Debt-free", when:"By end of Dec 2026", why:"RBC, Scotia and friends. The Money tab tracks each payment.", ms:[
+  ["db6","Fido final bill: Promise to Pay set up","2026-10-26"],
+  ["db2","Pay UNB fees ($750)","2026-10-29"],
+  ["db1","RBC back under its limit (before Nov 19)","2026-11-19"],
+  ["db3","RBC paid off","2026-11-30"],
+  ["db4","Scotia paid off","2026-12-15"],
+  ["db5","Friends paid back","2026-12-31"]]},
+ {area:"School and money", id:"money", title:"Pay for school", when:"Ongoing", why:"$20k saved by end of summer 2027. Co-op savings, a TFSA, and part-time work during school.", ms:[
+  ["mon4","Cancel DashPass + both Uber One, Spotify to student","2026-10-31"],
+  ["mon7","Car fund from every paycheque","2026-11-05"],
+  ["mon1","Open a TFSA and start investing (VFV or QQC)","2027-01-31"],
+  ["mon5","Emergency fund at $1,000","2027-02-28"],
+  ["mon2","Plan Fall 2027 tuition from co-op savings","2027-08-31"],
+  ["mon6","Take about $5k from the TFSA for fall tuition","2027-09-01"],
+  ["mon3","Part-time work during school (tutoring, IFS, Irving Oil)","2027-09-30"]]},
+ {area:"School and money", id:"gpa", title:"4.3 GPA year", when:"Sep 2027 – Apr 2028", why:"The biggest gate for CSA and nuclear employers. At least $7,000 in UNB scholarships too.", ms:[
   ["gpa1","Set up a study system before term starts","2027-09-08"],
   ["gpa0","Meet an advisor about the math minor and DTME","2027-09-30"],
   ["gpa2","Every Fall assignment handed in on time","2027-12-20"],
   ["gpa3","Fall term: 4.3","2027-12-31"],
   ["gpa4","Submit scholarship application (Jan 1 – Apr 15)","2028-04-15"],
   ["gpa5","Winter term: 4.3","2028-04-30"]]},
- {area:"School and money", id:"debt", title:"Debt-free", when:"By Dec 2026", why:"RBC $3,500 (over its $2,500 limit), Scotia $1,000, friends $1,500. Money tab tracks each payment.", ms:[
-  ["db1","RBC back under its limit","2026-10-22"],
-  ["db2","Pay UNB fees ($750)","2026-10-29"],
-  ["db3","RBC paid off","2026-11-30"],
-  ["db4","Scotia paid off","2026-12-15"],
-  ["db5","Friends paid back","2026-12-31"]]},
- {area:"School and money", id:"money", title:"Pay for school", when:"Ongoing", why:"Fall tuition about $14k, winter about $12k. Co-op savings, a TFSA, and part-time work during school.", ms:[
-  ["mon4","Switch Spotify to student, cut the extra Uber One","2026-10-31"],
-  ["mon1","Open a TFSA and start investing (VFV or QQC)","2027-01-31"],
-  ["mon5","Emergency fund at $1,000","2027-02-28"],
-  ["mon2","Plan Fall 2027 tuition from co-op savings","2027-08-31"],
-  ["mon6","Take about $5k from the TFSA for fall tuition","2027-09-01"],
-  ["mon3","Part-time engineering work during school (IFS, Paragon, Irving Oil)","2027-09-30"]]},
- {area:"Career", id:"ifs", title:"IFS: Fall + Winter 2027", when:"Now – Apr 2027", why:"Extension granted for Winter 2027. A great reference from Jennifer helps every application after this.", ms:[
-  ["ifs4","Get the formal Winter offer letter from Victoria","2026-10-31"],
-  ["ifs5","Find Saint John housing for Jan (co-op apartment ends Jan 1)","2026-12-01"],
-  ["ifs1","Give a short update in a team meeting","2027-03-31"],
-  ["ifs2","Ask Jennifer for a reference","2027-04-15"],
-  ["ifs3","End-of-term presentation of your work","2027-04-30"]]},
- {area:"Career", id:"coop", title:"Summer 2027 co-op, new company", when:"Apply Jan – Mar", why:"Good pay that makes sense financially. Ford (family friend), Irving Oil, aerospace or energy. Toronto is fine.", ms:[
-  ["co1","Resume and cover letter updated with IFS work","2026-12-15"],
-  ["co5","Reach out to the Ford contact through the family friend","2026-12-31"],
-  ["co2","15 applications sent","2027-01-31"],
-  ["co3","40+ applications sent","2027-03-15"],
-  ["co4","Offer accepted","2027-04-15"]]},
- {area:"Certifications", id:"cswa", title:"Official SolidWorks CSWA", when:"By Dec 2026", why:"Your current certificate isn't the official Dassault one. Employers look for CSWA.", ms:[
-  ["sw1","Install SolidWorks (student licence)","2026-10-20"],
-  ["sw2","Work through the official sample exam","2026-11-01"],
-  ["sw3","Two timed practice exams","2026-11-25"],
-  ["sw4","Pass the CSWA","2026-12-12"],
-  ["sw5","Optional: CSWP","2027-08-31"]]},
- {area:"Certifications", id:"ansys", title:"Ansys Associate certification", when:"Jan – Feb 2027", why:"FEA stands out for aerospace and design roles.", ms:[
-  ["an1","Install Ansys Student (not Discovery)","2027-01-05"],
-  ["an2","Finish the free learning track","2027-02-10"],
-  ["an3","Pass the Associate exam","2027-02-28"]]},
- {area:"Project and research", id:"pend", title:"Double inverted pendulum", when:"Nov 2026 – Apr 2028", why:"Your portfolio project. Uses SolidWorks, Ansys, MATLAB and Arduino together.", ms:[
-  ["pe0","MATLAB Onramp and Simulink Onramp (free)","2026-12-20"],
-  ["pe1","Derive single-pendulum equations","2027-03-15"],
-  ["pe2","Simulate single pendulum with LQR","2027-03-31"],
-  ["pe3","Simulate double pendulum","2027-04-30"],
-  ["pe4","Design the cart and parts in SolidWorks","2027-06-15"],
-  ["pe5","FEA on a bracket in Ansys","2027-06-30"],
-  ["pe6","Build and balance the single pendulum","2027-08-31"],
-  ["pe7","Stretch: double-pendulum hardware","2028-04-30"]]},
- {area:"Project and research", id:"res", title:"Research and a conference talk", when:"Oct 2026 – 2028", why:"Like Ahmed. Turn the pendulum into research with a professor.", ms:[
-  ["re1","Message Ahmed about how he did it","2026-10-31"],
-  ["re2","Shortlist 5 UNB profs (controls, robotics, dynamics)","2027-03-31"],
-  ["re3","Email them pitching the pendulum project","2027-04-30"],
-  ["re4","Supervisor confirmed for Fall 2027","2027-08-31"],
-  ["re5","Abstract submitted (CSME or CASI)","2028-04-30"],
-  ["re6","Present at the conference","2028-10-31"]]},
+ {area:"Fitness", id:"fit", title:"Cut fat, keep building muscle", when:"Ongoing", why:"Lean, athletic soccer-player-who-lifts look. Full body Mon/Wed/Fri + cardio. Daily tracking lives in Today, Food and Week.", ms:[
+  ["fi1","Take starting progress photos (then every 2 weeks)","2026-10-15"],
+  ["fi7","Start full body Mon/Wed/Fri + the cardio plan","2026-10-26"],
+  ["fi2","Join the Saint John football group","2026-10-31"],
+  ["fi3","Beat bench 70 kg × 7","2026-11-30"],
+  ["fi4","3 full-body days a week for 8 weeks straight","2026-12-21"],
+  ["fi5","First 5 kg down from 84 kg","2027-01-15"],
+  ["fi6","Compare progress photos","2027-01-15"]]},
  {area:"Communication", id:"email", title:"Write emails without AI", when:"Oct – Dec 2026", why:"Confidence comes from reps. You send emails every day at work anyway.", ms:[
   ["em1","30 days writing every email yourself first","2026-11-15"],
   ["em2","Phrase bank on your phone with 30 phrases","2026-12-31"],
   ["em3","Send a full week of emails with no AI check","2027-01-31"]]},
- {area:"Communication", id:"present", title:"English and presentation skills", when:"Ongoing", why:"Builds toward the conference talk.", ms:[
-  ["pr1","15 min English reading most days for 6 weeks","2026-11-30"],
-  ["pr2","Visit a Toastmasters club","2027-01-31"],
+ {area:"Communication", id:"present", title:"English and presentation skills", when:"Ongoing", why:"Builds toward the conference talk. Not on the ride or at work.", ms:[
+  ["pr1","15 min English reading most evenings for 6 weeks","2026-12-15"],
   ["pr3","Record a 3-minute talk and rewatch it","2027-02-28"],
+  ["pr2","Visit a Toastmasters club","2027-09-30"],
   ["pr4","Present the pendulum at a UNB showcase","2028-03-31"]]},
- {area:"Fitness", id:"fit", title:"Cut fat, keep building muscle", when:"Ongoing", why:"Lean, athletic soccer-player-who-lifts look. Daily tracking lives in Today, Food and Week.", ms:[
-  ["fi1","Take starting progress photos (then every 2 weeks)","2026-10-15"],
-  ["fi2","Join the Saint John football group","2026-10-31"],
-  ["fi3","Beat bench 70 kg × 7","2026-11-30"],
-  ["fi4","4 gym days a week for 8 weeks straight","2026-12-01"],
-  ["fi5","First 5 kg down from 84 kg","2027-01-15"],
-  ["fi6","Compare progress photos","2027-01-15"]]},
  {area:"Life", id:"drive", title:"NB licence and first car", when:"Nov 2026 – Feb 2027", why:"Cheapest route to a licence, then an older Camry (2006–2009, about $2,500–3,000) once debt is gone.", ms:[
   ["dr1","Ask Service NB if your Dubai licence history counts","2026-11-15"],
-  ["dr2","Pass the knowledge test","2026-12-15"],
+  ["dr2","Pass the knowledge test","2026-11-30"],
   ["dr4","Buy the Camry (after debt-free)","2027-01-31"],
   ["dr3","Pass the road test","2027-02-28"]]}
  ],
  phases:[
- {from:"2026-10-01",to:"2026-12-31",t:"IFS Fall term",s:"Oct – Dec 2026",i:["Debt-free by December (Money tab)","UNB fees $750 by Oct 29","CSWA, exam by early Dec","Winter offer letter + Saint John housing for Jan","Message Ahmed","Write your own emails, start a phrase bank","Football group, steady gym routine","Licence: Service NB, knowledge test","Resume ready by Dec 15"]},
- {from:"2027-01-01",to:"2027-04-30",t:"IFS Winter term",s:"Jan – Apr 2027",i:["Summer co-op applications first (Ford contact, Irving Oil, others)","Open TFSA, start investing","Buy the Camry, road test","Ansys Associate by end of Feb","Pendulum simulation (Mar – Apr)","Email professors in April","Ask Jennifer for a reference"]},
- {from:"2027-05-01",to:"2027-08-31",t:"Summer co-op",s:"May – Aug 2027",i:["Build the single pendulum (SolidWorks + Ansys)","Lock in a research supervisor","Save for Fall tuition (about $14k)","Line up part-time engineering work for school","Optional: CSWP"]},
- {from:"2027-09-01",to:"2028-04-30",t:"Study terms",s:"Sep 2027 – Apr 2028",i:["4.3 GPA comes first","Take about $5k from the TFSA for tuition","Part-time work, max 10 h/week","Pendulum research, ~3 h/week, pause in exams","Scholarship application by Apr 15","Conference abstract"]},
- {from:"2028-05-01",to:"2028-12-31",t:"After",s:"2028",i:["Present at the conference","2028 co-op search with a stronger profile"]}
+ {from:"2026-10-01",to:"2026-12-18",t:"IFS Fall term",s:"Now – Dec 18",i:["Debt: Fido arrangement now, RBC under its limit by Nov 19, debt-free by end of Dec","CSWA exam Nov 28–29 (backup Dec 12)","Pendulum: math until Nov 15, Bootcamp lectures 4–12 by Dec 18","Work log, LinkedIn, STAR stories, resume by Dec 15","Saint John housing for Winter by Dec 1","Licence knowledge test in November","Join the Canadian Nuclear Society, one coffee chat"]},
+ {from:"2026-12-19",to:"2027-01-03",t:"Move + holidays",s:"Dec 19 – Jan 3",i:["Move into Winter housing","Light week: Python + GitHub set up for the pendulum","Message the Ford contact","Rest"]},
+ {from:"2027-01-04",to:"2027-04-30",t:"IFS Winter term",s:"Jan – Apr 2027",i:["Summer co-op applications first: energy (Lepreau, OPG, Bruce, Moltex) + Ford","Open TFSA, start investing","Buy the Camry, road test","Pendulum: LQR + double pendulum by mid-Feb, write-up by end of Feb","Ansys Associate Feb – Mar","CAD the rig Mar – Apr","Email professors in April","Written evaluation + reference from Jennifer"]},
+ {from:"2027-05-01",to:"2027-08-31",t:"Summer co-op",s:"May – Aug 2027",i:["Energy co-op, ideally","Build the single pendulum (SolidWorks + Ansys)","Lock in a research supervisor","Save for Fall tuition (about $14k), $20k total by end of August","Line up part-time work for school","Optional: CSWP"]},
+ {from:"2027-09-01",to:"2028-04-30",t:"Study terms",s:"Sep 2027 – Apr 2028",i:["4.3 GPA comes first","Join a UNB rocketry, satellite or robotics team","Take about $5k from the TFSA for tuition","Part-time work, max 10 h/week","Pendulum research, ~3 h/week, pause in exams","Scholarship application by Apr 15","Conference abstract"]},
+ {from:"2028-05-01",to:"2029-12-31",t:"After",s:"2028 – 2029",i:["Present at the conference","Last co-op: space (MDA, CSA, aerospace)","Graduate, then the CSA Engineer Development Program"]}
  ],
  focus:[
- {to:"2026-12-15",t:"Debt + SolidWorks CSWA",n:"Payday checklist first. CSWA exam by early December."},
- {to:"2027-02-28",t:"Ansys + co-op applications",n:"Applications come first in Jan – Mar."},
- {to:"2027-04-30",t:"Pendulum simulation + applications",n:"Also email professors in April."},
+ {to:"2026-11-29",t:"CSWA + pendulum math",n:"Tue CSWA, Thu pendulum, Sat both. Payday checklist first."},
+ {to:"2026-12-18",t:"Bootcamp lectures + resume",n:"Resume, LinkedIn and STAR stories ready by Dec 15."},
+ {to:"2027-02-28",t:"Co-op applications + pendulum simulation",n:"Applications come first in Jan – Feb."},
+ {to:"2027-04-30",t:"Ansys + CAD the rig",n:"Also email professors in April."},
  {to:"2027-08-31",t:"Build the single pendulum",n:"During your summer co-op, weekends only."},
  {to:"2028-04-30",t:"4.3 GPA",n:"Pendulum research about 3 h/week. Pause in exams."},
- {to:"2099-01-01",t:"Conference + 2028 co-op",n:"Present your work."}
+ {to:"2099-01-01",t:"Conference + space co-op",n:"Present your work."}
  ]};
-const clone = o => JSON.parse(JSON.stringify(o));
+// v2 defaults, used once to tell your own added goals and steps apart from old defaults
+const V2_GOALS = ["gpa", "debt", "money", "ifs", "coop", "cswa", "ansys", "pend", "res", "email", "present", "fit", "drive"];
+const V2_STEPS = ["gpa1", "gpa0", "gpa2", "gpa3", "gpa4", "gpa5", "db1", "db2", "db3", "db4", "db5", "mon4", "mon1", "mon5", "mon2", "mon6", "mon3", "ifs4", "ifs5", "ifs1", "ifs2", "ifs3", "co1", "co5", "co2", "co3", "co4", "sw1", "sw2", "sw3", "sw4", "sw5", "an1", "an2", "an3", "pe0", "pe1", "pe2", "pe3", "pe4", "pe5", "pe6", "pe7", "re1", "re2", "re3", "re4", "re5", "re6", "em1", "em2", "em3", "pr1", "pr2", "pr3", "pr4", "fi1", "fi2", "fi3", "fi4", "fi5", "fi6", "dr1", "dr2", "dr4", "dr3"];
+function migratePlan(){
+  const P = state.plan;
+  if (P && Array.isArray(P.goals) && (P.v||0) < 3){
+    const og = new Set(V2_GOALS), om = new Set(V2_STEPS), stored = {};
+    P.goals.forEach(g => stored[g.id] = g);
+    const goals = DEFAULT_PLAN.goals.map(g => {
+      const ng = clone(g), sg = stored[g.id];
+      if (sg && Array.isArray(sg.ms)) sg.ms.forEach(m => { if (!om.has(m[0]) && !ng.ms.some(x => x[0]===m[0])) ng.ms.push(m); });
+      return ng;
+    });
+    P.goals.forEach(g => { if (!og.has(g.id) && !DEFAULT_PLAN.goals.some(d => d.id===g.id)) goals.push(g); });
+    state.plan = {v:3, goals, phases: clone(DEFAULT_PLAN.phases), focus: clone(DEFAULT_PLAN.focus)};
+  }
+  if (!state.seed3){
+    state.seed3 = true;
+    state.ms = state.ms || {};
+    state.ms.ifs4 = true; state.ms.sw1 = true;
+    if (!state.todos) state.todos = [];
+    [["2026-10-23","Send Himanshu the student-feature write-up"],
+     ["2026-10-23","Ask Jennifer: site photos OK? + the CK valve lockout exception"],
+     ["2026-10-24","Fido: call 1-888-288-2106, set up a Promise to Pay (due Oct 26)"],
+     ["2026-10-25","Marketplace: look for a free desk or folding table"],
+     ["2026-10-26","Call RBC + Scotia: cancel protection plans, reverse over-limit fees, turn off over-limit"],
+     ["2026-10-26","Cancel DashPass + both Uber One, switch Spotify to student"],
+     ["2026-10-26","Ask Dan where taxis should drop off at the mill"],
+     ["2026-10-26","Book physio follow-up, ask if they direct-bill"]
+    ].forEach(([date,text],i) => { if (!state.todos.some(t => t.text===text)) state.todos.push({id:"s3"+i, text, date, done:false, doneDate:null}); });
+  }
+}
+
 function plan(){ if (!state.plan || !Array.isArray(state.plan.goals)) state.plan = clone(DEFAULT_PLAN); return state.plan; }
 const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const todayKey = () => { const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); };
+function nextStep(gid){ const g = plan().goals.find(x => x.id===gid); const m = g && g.ms.find(m => !state.ms[m[0]]); return m ? m[1] : "all done"; }
 function currentFocus(){ const k = todayKey(); const f = plan().focus.slice().sort((a,b)=>(a.to||"9").localeCompare(b.to||"9")).find(f => k <= (f.to||"9999")); return f || {t:"Set your main focus", n:"Tap Edit plan to add one."}; }
 const fmtD = s => s ? new Date(s+"T12:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "No date";
 const openGoals = new Set();
@@ -957,6 +1169,7 @@ function renderHeader(){
   const list = items(cur), dd = day(k);
   const done = list.filter(i => dd.checks[i.id]).length;
   $("scoreBig").innerHTML = done + "<small>/" + list.length + "</small>";
+  $("hBar").style.width = (list.length ? Math.round(done/list.length*100) : 0) + "%";
   const cal = Math.round(dd.food.reduce((a,f)=>a+f.c,0)), pro = Math.round(dd.food.reduce((a,f)=>a+f.p,0));
   $("scoreSide").innerHTML = "<b>"+cal.toLocaleString()+"</b> cal<br><b>"+pro+"</b> g protein";
   $("session").textContent = "Training: " + WORKOUTS[cur.getDay()];
@@ -1973,7 +2186,8 @@ function addTodo(){
   document.querySelectorAll(".tdwhen button").forEach(b => b.setAttribute("aria-pressed", b.dataset.w==="0"));
   save(); renderTodos();
 }
-function renderAll(){ renderHeader(); renderTodos(); renderChecklist(); renderFood(); renderWeek(); renderGoals(); renderMoney(); }
+function renderTip(){ const n = Math.floor(new Date(key(cur)+"T12:00:00").getTime()/86400000); const t = $("tipLine"); t.innerHTML = "<b>Keep in mind</b>"; t.append(TIPS[n % TIPS.length]); }
+function renderAll(){ renderHeader(); renderTip(); renderTodos(); renderChecklist(); renderFood(); renderWeek(); renderGoals(); renderMoney(); }
 
 function showTab(name){
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===name));
@@ -1996,7 +2210,7 @@ $("aPrev").onclick = () => { aOff--; renderActual(); };
 $("aNext").onclick = () => { if (aOff < 0){ aOff++; renderActual(); } };
 document.querySelectorAll("#tab-goals .subtabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll("#tab-goals .subtabs button").forEach(x => x.setAttribute("aria-pressed", x===b));
-  ["list","time","fit"].forEach(v => $("gv-"+v).hidden = v !== b.dataset.gv);
+  ["list","time","fit","mind"].forEach(v => $("gv-"+v).hidden = v !== b.dataset.gv);
 });
 $("prev").onclick = () => { cur.setDate(cur.getDate()-1); renderAll(); };
 $("next").onclick = () => { if (key(cur)!==key(today())) { cur.setDate(cur.getDate()+1); renderAll(); } };
@@ -2014,7 +2228,7 @@ $("waistAdd").onclick = () => {
   state.waist.push({v, d: today().toLocaleDateString(undefined,{month:"short",day:"numeric"})}); $("waist").value=""; renderWeek(); save();
 };
 
-loadLocal(); renderAll();
+loadLocal(); migratePlan(); saveLocal(); renderAll();
 
 // backup / restore
 $("exportBtn").onclick = async () => {
@@ -2033,7 +2247,7 @@ $("importFile").onchange = async e => {
     const data = JSON.parse(await f.text());
     if (!data || typeof data.days !== "object") throw new Error("bad");
     if (!confirm("Replace what's on this phone with this backup?")) return;
-    state = Object.assign({days:{},waist:[],ms:{},tdee:null}, data); saveLocal(); renderAll(); $("backupNote").textContent = "Backup restored.";
+    state = Object.assign({days:{},waist:[],ms:{},tdee:null}, data); migratePlan(); saveLocal(); renderAll(); $("backupNote").textContent = "Backup restored.";
   } catch(err) { $("backupNote").textContent = "That file isn't a tracker backup. Pick a file named tracker-backup-….json."; }
   e.target.value = "";
 };
